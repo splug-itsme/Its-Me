@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>shotDig</class>
+ <widget class="QWidget" name="shotDig">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>400</width>
+    <height>300</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>shotDig</string>
+  </property>
+  <widget class="QLabel" name="imgLbl">
+   <property name="geometry">
+    <rect>
+     <x>150</x>
+     <y>170</y>
+     <width>64</width>
+     <height>15</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string/>
+   </property>
+  </widget>
+ </widget>
+ <layoutdefault spacing="6" margin="11"/>
+ <resources/>
+ <connections/>
+</ui>

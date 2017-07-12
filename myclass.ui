@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MyClassClass</class>
+ <widget class="QMainWindow" name="MyClassClass">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>1115</width>
+    <height>756</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>MyClass</string>
+  </property>
+  <widget class="QWidget" name="centralWidget">
+   <widget class="QPushButton" name="strBtn">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>20</y>
+      <width>79</width>
+      <height>46</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>start</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="editBtn">
+    <property name="geometry">
+     <rect>
+      <x>110</x>
+      <y>20</y>
+      <width>79</width>
+      <height>46</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>edit</string>
+    </property>
+   </widget>
+   <widget class="QWidget" name="verticalLayoutWidget">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>10</y>
+      <width>1091</width>
+      <height>681</height>
+     </rect>
+    </property>
+    <layout class="QVBoxLayout" name="verticalLayout"/>
+   </widget>
+   <zorder>verticalLayoutWidget</zorder>
+   <zorder>strBtn</zorder>
+   <zorder>editBtn</zorder>
+  </widget>
+  <widget class="QMenuBar" name="menuBar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>1115</width>
+     <height>26</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QToolBar" name="mainToolBar">
+   <attribute name="toolBarArea">
+    <enum>TopToolBarArea</enum>
+   </attribute>
+   <attribute name="toolBarBreak">
+    <bool>false</bool>
+   </attribute>
+  </widget>
+  <widget class="QStatusBar" name="statusBar"/>
+ </widget>
+ <layoutdefault spacing="6" margin="11"/>
+ <resources>
+  <include location="myclass.qrc"/>
+ </resources>
+ <connections>
+  <connection>
+   <sender>strBtn</sender>
+   <signal>clicked()</signal>
+   <receiver>MyClassClass</receiver>
+   <slot>newDig()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>36</x>
+     <y>92</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>147</x>
+     <y>301</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+ <slots>
+  <slot>newDig()</slot>
+ </slots>
+</ui>
