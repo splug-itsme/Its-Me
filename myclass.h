@@ -13,6 +13,8 @@
 #include <QFileDialog>
 #include <QPixmap>
 #include <QImage>
+#include <qvideoprobe.h>
+#include <QMediaRecorder>
 
 
 class MyClass : public QMainWindow

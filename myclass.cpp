@@ -21,6 +21,7 @@ MyClass::MyClass(QWidget *parent)
 	connect(cic, SIGNAL(imageCaptured(int, QImage)), this, SLOT(processImage(int, QImage)));
 	cam->setCaptureMode(QCamera::CaptureStillImage);
 	cam->start();
+
 }
 
 MyClass::~MyClass()
@@ -31,7 +32,6 @@ MyClass::~MyClass()
 
 void MyClass::newDig() {
 	cic->capture();
-	//QString name = QFileDialog::getSaveFileName();
 	//shotDig mDig = new shotDig();
 
 
@@ -40,9 +40,21 @@ void MyClass::newDig() {
 
 void MyClass::processImage(int i, QImage img)
 {
-	QString name = QFileDialog::getSaveFileName();
-	img.save(name);
-	//cam->stop();
+	//QString name = QFileDialog::getSaveFileName();
+	//img.save(name);
+	cam->stop();
+
+	QMediaRecorder * recorder = new QMediaRecorder(cam);
+
+	cam->setCaptureMode(QCamera::CaptureVideo);
+	cam->start();
+
+	//on shutter button pressed
+	recorder->record();
+	recorder->setOutputLocation;
+
+	// sometime later, or on another press
+	recorder->stop();
 	shotDig mDig = new shotDig();
 
 }
