@@ -4,12 +4,12 @@
 MyClass::MyClass(QWidget *parent)
 	: QMainWindow(parent)
 {
-	QDesktopWidget * dw=new QDesktopWidget();
+	QDesktopWidget * dw = new QDesktopWidget();
 	ui.setupUi(this);
 	vf = new QCameraViewfinder(ui.verticalLayoutWidget);
 	ui.verticalLayout->addWidget(vf);
 	this->resize(dw->geometry().width(), dw->geometry().height());
-	
+
 	foreach(QCameraInfo info, QCameraInfo::availableCameras())
 	{
 		cam = new QCamera(info);
@@ -30,10 +30,9 @@ MyClass::~MyClass()
 
 
 void MyClass::newDig() {
-	
-	QString name = QFileDialog::getSaveFileName();
-	
-	shotDig mDig = new shotDig();
+	cic->capture();
+	//QString name = QFileDialog::getSaveFileName();
+	//shotDig mDig = new shotDig();
 
 
 }
@@ -44,6 +43,8 @@ void MyClass::processImage(int i, QImage img)
 	QString name = QFileDialog::getSaveFileName();
 	img.save(name);
 	//cam->stop();
+	shotDig mDig = new shotDig();
+
 }
 
 
