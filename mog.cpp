@@ -1,4 +1,4 @@
-
+#include <opencv/cv.hpp>
 #include "opencv\cv.h"
 #include "opencv\highgui.h"
 #include "opencv\cxcore.h"
@@ -30,7 +30,7 @@ void copy(Mat &Img, Mat &result, Mat &mask);
 void cal_Degree(vector <Mat> &frame, int start, int end);
 int return_Max(vector <int> &agrDegree);
 void gray(char *videoFile);
-
+Mat add_object(Mat background, Mat object, Point center);
 Mat des;
 
 int main(int argc, char *argv[])
@@ -284,6 +284,13 @@ void copy(Mat &Img, Mat &result, Mat &mask) // copyTo ±¸Çö
 			}
 		}
 	}
+}
+Mat add_object(Mat background, Mat object, Point center) {
+	// center is object's center location
+	Mat src_mask = 255 * Mat::ones(object.rows, object.cols, object.depth());
+	Mat result;
+	seamlessClone(object, background, src_mask, center, result, NORMAL_CLONE);
+	return result;
 }
 /*
 void Mat::copyTo(OutputArray _dst, InputArray _mask) const
