@@ -1,3 +1,19 @@
+#include <iostream>
+#include <iomanip> 
+#include <string>
+#include <vector>
+#include <fstream>
+#include <thread>
+
+#define OPENCV
+
+#include "yolo_v2_class.hpp"	// imported functions from DLL
+
+
+#ifdef OPENCV
+#include <opencv2/opencv.hpp>			// C++
+#pragma comment(lib, "opencv_world310.lib")
+#endif
 
 #include "opencv\cv.h"
 #include "opencv\highgui.h"
@@ -12,11 +28,8 @@
 //C
 #include <stdio.h>
 //C++
-#include <iostream>
 #include <sstream>
-#include <vector>
 #include <algorithm>
-#include <thread>
 
 #define DEGREE 10
 
@@ -26,21 +39,47 @@ using namespace std;
 int sub_Bground(char *videoFile);
 void changeGray(Mat &Img);
 void cvDiff(Mat &image, Mat &image2, Mat &diff);
-void copy(Mat &Img, Mat &result, Mat &mask);
+void copyMask(Mat &Img, Mat &result, Mat &mask);
 void cal_Degree(vector <Mat> &frame, int start, int end);
 int return_Max(vector <int> &agrDegree);
-void gray(char *videoFile);
 
+
+void make_Mask(Mat &res, vector<bbox_t> const result_vec);
+void check_Mat(Mat &mat);
 Mat des;
+
+
+
+
+void show_result(std::vector<bbox_t> const result_vec, std::vector<std::string> const obj_names) {
+	for (auto &i : result_vec) {
+		if (obj_names.size() > i.obj_id) std::cout << obj_names[i.obj_id] << " - ";
+		std::cout << "obj_id = " << i.obj_id << ",  x = " << i.x << ", y = " << i.y
+			<< ", w = " << i.w << ", h = " << i.h
+			<< std::setprecision(3) << ", prob = " << i.prob << std::endl;
+	}
+}
+
+std::vector<std::string> objects_names_from_file(std::string const filename) {
+	std::ifstream file(filename);
+	std::vector<std::string> file_lines;
+	if (!file.is_open()) return file_lines;
+	for (std::string line; file >> line;) file_lines.push_back(line);
+	std::cout << "object names loaded \n";
+	return file_lines;
+}
+
 
 int main(int argc, char *argv[])
 {
+
+	auto obj_names = objects_names_from_file("data/voc.names");
 	//cvNamedWindow("Image");
 	//cvNamedWindow("Image2");
 	//cvNamedWindow("tmpImage");
 	//cvNamedWindow("diffImage");
 	//cvNamedWindow("resultImage");
-	if (sub_Bground("3.mp4") == 1)
+	if (sub_Bground("2.mp4") == 1)
 		return 1;
 	if (cvWaitKey() == 27)
 		//	; // break에서 바꿈 키입력받을때마다 프레임이동
@@ -50,62 +89,34 @@ int main(int argc, char *argv[])
 
 	return 0;
 }
-void gray(char *videoFile)
+void make_Mask(Mat &res, vector<bbox_t> const result_vec)
 {
-	VideoCapture capture(videoFile);  // 영상 파일 읽기
-	if (!capture.isOpened()) {
-		//error in opening the video input
-		cerr << "Unable to open video file: " << "tt" << endl;
-		exit(EXIT_FAILURE);
+	Vec3b* resMat = (Vec3b*)res.data;
+	for (auto &i : result_vec) {
+		/*for (int x = i.x; x < i.x + i.w, x < res.cols; x++) {
+		for (int y = i.y; y < i.y + i.h, y < res.rows ; y++) {
+		resMat[y * res.cols + x] = Vec3b(255, 255, 255);
+		}
+		}*/
+		Point pt(i.x, i.y);
+		Rect rect(pt, Size(i.w, i.h));
+		rectangle(res, rect, Scalar(255, 255, 255), FILLED);
 	}
-	Mat Img = imread("result.bmp");//, IMREAD_GRAYSCALE);
-	Mat diff = Mat(Img.rows, Img.cols, CV_8UC3, Scalar(0, 0, 0));
-	Mat readImg = Mat(Img.rows, Img.cols, CV_16UC3, Scalar(0, 0, 0));
-	Mat tmp = Mat(Img.rows, Img.cols, CV_8UC3, Scalar(0, 0, 0));
-
-	Ptr<BackgroundSubtractor> pMOG2; //MOG2 Background subtractor
-	pMOG2 = createBackgroundSubtractorMOG2();
-
-	while (capture.read(readImg)) {
-		//cvtColor(readImg, readImg, CV_BGR2GRAY);
-		//	pMOG2->apply(readImg, tmp);
-		//get the frame number and write it on the current frame
-		stringstream ss;
-		rectangle(readImg, cv::Point(10, 2), cv::Point(100, 20),
-			cv::Scalar(255, 255, 255), -1);
-		ss << capture.get(CAP_PROP_POS_FRAMES);
-		string frameNumberString = ss.str();
-		putText(readImg, frameNumberString.c_str(), cv::Point(10, 10),
-			FONT_HERSHEY_SIMPLEX, 0.5, cv::Scalar(0, 0, 0));
-		//show the current frame and the fg masks
-		imshow("Frame", readImg);
-		imshow("FG Mask MOG 2", tmp);
-		//get the input from the keyboard
-
-		absdiff(Img, readImg, diff); // 첫 프레임과 매 프레임마다의 차영상을 diff에 저장
-		threshold(diff, tmp, 20, 255, CV_THRESH_BINARY); // 차영상을 이진화 시켜서 tmp에 저장
-		changeGray(tmp);
-		erode(tmp, tmp, Mat(), Point(-1, -1), 3);
-		imshow("tmp", tmp);
-		imshow("Img", Img);
-		imshow("readImg", readImg);
-		if (cvWaitKey() == 27) continue; // break에서 바꿈 키입력받을때마다 프레임이동
-
-	}
-
+	imshow("Mask", res);
 }
+
 int sub_Bground(char *videoFile)
 {
+	Detector detector("yolo.cfg", "yolo.weights");
 	VideoCapture capture(videoFile);  // 영상 파일 읽기
-	VideoWriter vw;
-	vw = VideoWriter("AA.mp4", CV_FOURCC('D', 'I', 'V', 'X'), capture.get(CV_CAP_PROP_FPS), Size((int)capture.get(CV_CAP_PROP_FRAME_WIDTH), (int)capture.get(CV_CAP_PROP_FRAME_HEIGHT)), true);
+
 	vector<Mat> src;
 
-	if (!vw.isOpened())
+	/*if (!vw.isOpened())
 	{
-		cout << "동영상을 저장하기 위한 초기화 작업 중 에러 발생" << endl;
-		return 1;
-	}
+	cout << "동영상을 저장하기 위한 초기화 작업 중 에러 발생" << endl;
+	return 1;
+	}*/
 	if (!capture.isOpened()) {
 		//error in opening the video input
 		cerr << "Unable to open video file: " << "tt" << endl;
@@ -118,7 +129,8 @@ int sub_Bground(char *videoFile)
 
 					   //Mat Img = imread("result.bmp"); // Img에 결과로 얻은 이미지 저장
 	Mat readImg = Mat(Img.rows, Img.cols, CV_32SC3, Scalar(0, 0, 0)); // 
-	Mat diff = Mat(Img.rows, Img.cols, CV_32SC3, Scalar(0, 0, 0));
+																	  //Mat diff = Mat(Img.rows, Img.cols, CV_32SC3, Scalar(0, 0, 0));
+
 	Mat tmp = Mat(Img.rows, Img.cols, CV_32SC3, Scalar(0, 0, 0));
 	des = Mat(Img.rows, Img.cols, CV_8UC3, Scalar(0, 0, 0)); // 결과를 저장할 Mat
 
@@ -130,59 +142,58 @@ int sub_Bground(char *videoFile)
 	while (capture.read(readImg))
 	{
 		check++;
-		if (check % 5 != 0)
+		if (check % 4 != 0)
 			continue;
+		vector<bbox_t> result_vec = detector.detect(readImg);
+		Mat diff = Mat(Img.rows, Img.cols, CV_8UC3, Scalar(0, 0, 0));
 		Mat result = Mat(Img.rows, Img.cols, CV_32SC3, Scalar(0, 0, 0));
 
-		absdiff(Img, readImg, diff); // 첫 프레임과 매 프레임마다의 차영상을 diff에 저장
-		threshold(diff, tmp, 20, 255, CV_THRESH_BINARY); // 차영상을 이진화 시켜서 tmp에 저장
+		//cvtColor(tmp, tmp, CV_BGR2GRAY);
 
-														 //cvtColor(tmp, tmp, CV_BGR2GRAY);
-		changeGray(tmp); // 이진화 시킨 tmp를 완벽하게 이진화
+		//absdiff(Img, readImg, diff); // 첫 프레임과 매 프레임마다의 차영상을 diff에 저장
+		//threshold(diff, tmp, 20, 255, CV_THRESH_BINARY); // 차영상을 이진화 시켜서 tmp에 저장
+		//changeGray(tmp); // 이진화 시킨 tmp를 완벽하게 이진화
 
-		pMOG2->apply(tmp, diff); // 이진화 시킨 것을 가지고 MOG2
-		erode(diff, diff, Mat(), Point(-1, -1), 3);
+		//pMOG2->apply(tmp, diff); // 이진화 시킨 것을 가지고 MOG2
+		//erode(diff, diff, Mat(), Point(-1, -1), 3);
+
 		//blur(diff, diff, Size(5, 5)); // noise 제거
-		diff = ~diff;
+		//diff = ~diff;
 		//readImg.copyTo(result, diff); // 물체 영역의 반전을 붙여넣는다.
-		copy(readImg, result, diff); // 물체 영역의 반전을 붙여넣는다.
 
+		make_Mask(diff, result_vec);
+		copyMask(readImg, result, diff); // 물체 영역의 반전을 붙여넣는다.
 
 		frame.push_back(result);
 
-		/*	if (frame.size() == 10) {
-		checkDegree(frame);
-		src.push_back(Img3);
-		frame.clear();
-		}*/
+
 		imshow("Image", Img);
 		imshow("Image2", readImg);
 		imshow("diffImage", diff);
-		imshow("tmpImage", tmp);
 		imshow("resultImage", result);
 
-		if (cvWaitKey() == 27) continue; // break에서 바꿈 키입력받을때마다 프레임이동
+		//if (cvWaitKey() == 27) continue; // break에서 바꿈 키입력받을때마다 프레임이동
 
 	}
-
-	int size = frame[0].rows / 6; // thread 생성
+	printf("frame : %d\n", frame.size());
+	int size = frame[0].rows / 4; // thread 생성
 	thread t1(&cal_Degree, frame, 0, size);
 	thread t2(&cal_Degree, frame, size, size * 2);
 	thread t3(&cal_Degree, frame, size * 2, size * 3);
 	thread t4(&cal_Degree, frame, size * 3, size * 4);
-	thread t5(&cal_Degree, frame, size * 4, size * 5);
+	/*thread t5(&cal_Degree, frame, size * 4, size * 5);
 	thread t6(&cal_Degree, frame, size * 5, size * 6);
-
+	*/
 	t1.join();
 	t2.join();
 	t3.join();
-	t4.join();
-	t5.join();
-	t6.join();
-
+	t4.join();/*
+			  t5.join();
+			  t6.join();*/
+	check_Mat(des);
 	imwrite("result.bmp", des);
 	capture.release();
-	vw.release();
+	//vw.release();
 
 	return 0;
 }
@@ -190,6 +201,7 @@ void cal_Degree(vector <Mat> &frame, int start, int end) {  // 단일 구간의 프레�
 	printf("%d %d %d\n", frame.size(), start, end);
 	vector <Mat> tmp;
 	tmp.resize(frame.size());
+
 	for (int i = 0; i < frame.size(); i++)
 	{
 		frame[i].convertTo(tmp[i], CV_8UC3);
@@ -221,6 +233,20 @@ void cal_Degree(vector <Mat> &frame, int start, int end) {  // 단일 구간의 프레�
 	imwrite("Img2.bmp", frame[1]);
 	imwrite("result.bmp", des);
 
+}
+void check_Mat(Mat &mat)
+{
+	Vec3b* matData = (Vec3b*)mat.data;
+	int k = 0;
+	for (int i = 0; i < mat.rows; i++) {
+		for (int j = 0; j < mat.cols; j++) {
+			if (matData[i * mat.cols + j] == Vec3b(300, 300, 300)) {
+				k++;
+			}
+
+		}
+	}
+	printf("k : %d\n", k);
 }
 int return_Max(vector <int> &agrDegree) // 일치도 최대값을 가진 프레임 번호 반환
 {
@@ -266,17 +292,28 @@ void changeGray(Mat &Img) // 채널 3개 이진화 하기
 		}
 	}
 }
-void copy(Mat &Img, Mat &result, Mat &mask) // copyTo 구현
+void copyMask(Mat &Img, Mat &result, Mat &mask) // copyTo 구현
 {
 	Img.convertTo(Img, CV_32SC3);
 
-	uchar* maskData = (uchar*)mask.data;
+	//uchar* maskData = (uchar*)mask.data;
+	Vec3b* maskData = (Vec3b*)mask.data;
 	Vec3i* ImgData = (Vec3i*)Img.data;
 	Vec3i* resData = (Vec3i*)result.data;
 
+	//for (int i = 0; i < mask.rows; i++) {
+	//	for (int j = 0; j < mask.cols; j++) {
+	//		if (maskData[i * mask.cols + j] != uchar(128)) { // 흰색이라면! 붙이기
+	//			resData[i * mask.cols + j] = ImgData[i * mask.cols + j];
+	//		}
+	//		else { // 검은색 부분은 300으로 채우기
+	//			resData[i * mask.cols + j] = Vec3i(300, 300, 300);
+	//		}
+	//	}
+	//}
 	for (int i = 0; i < mask.rows; i++) {
 		for (int j = 0; j < mask.cols; j++) {
-			if (maskData[i * mask.cols + j] != uchar(128)) { // 흰색이라면! 붙이기
+			if (maskData[i * mask.cols + j] != Vec3b(255, 255, 255)) { // 흰색이라면! 붙이기
 				resData[i * mask.cols + j] = ImgData[i * mask.cols + j];
 			}
 			else { // 검은색 부분은 300으로 채우기
@@ -285,44 +322,3 @@ void copy(Mat &Img, Mat &result, Mat &mask) // copyTo 구현
 		}
 	}
 }
-/*
-void Mat::copyTo(OutputArray _dst, InputArray _mask) const
-{
-Mat mask = _mask.getMat();
-if (!mask.data)
-{
-copyTo(_dst);
-return;
-}
-
-int cn = channels(), mcn = mask.channels();
-CV_Assert(mask.depth() == CV_8U && (mcn == 1 || mcn == cn));
-bool colorMask = mcn > 1;
-
-size_t esz = colorMask ? elemSize1() : elemSize();
-BinaryFunc copymask = getCopyMaskFunc(esz);
-
-uchar* data0 = _dst.getMat().data;
-_dst.create(dims, size, type());
-Mat dst = _dst.getMat();
-
-if (dst.data != data0) // do not leave dst uninitialized
-dst = Scalar(0);
-
-if (dims <= 2)
-{
-CV_Assert(size() == mask.size());
-Size sz = getContinuousSize(*this, dst, mask, mcn);
-copymask(data, step, mask.data, mask.step, dst.data, dst.step, sz, &esz);
-return;
-}
-
-const Mat* arrays[] = { this, &dst, &mask, 0 };
-uchar* ptrs[3];
-NAryMatIterator it(arrays, ptrs);
-Size sz((int)(it.size*mcn), 1);
-
-for (size_t i = 0; i < it.nplanes; i++, ++it)
-copymask(ptrs[0], 0, ptrs[2], 0, ptrs[1], 0, sz, &esz);
-}
-*/
