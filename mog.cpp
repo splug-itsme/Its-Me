@@ -49,6 +49,7 @@ void capture_ROI(Mat &des, char *videoFile, char *saveFile);
 void add_ObjectToRes(Mat &des);
 
 
+Detector detector("yolo.cfg", "yolo.weights");
 
 
 
@@ -61,22 +62,8 @@ void show_result(std::vector<bbox_t> const result_vec, std::vector<std::string> 
 	}
 }
 
-std::vector<std::string> objects_names_from_file(std::string const filename) {
-	std::ifstream file(filename);
-	std::vector<std::string> file_lines;
-	if (!file.is_open()) return file_lines;
-	for (std::string line; file >> line;) file_lines.push_back(line);
-	std::cout << "object names loaded \n";
-	return file_lines;
-}
-
-
 int main(int argc, char *argv[])
 {
-
-	auto obj_names = objects_names_from_file("data/voc.names");
-
-
 	Mat des = sub_Bground("3.mp4");
 
 	capture_ROI(des, "3.mp4", "AA.mp4");
@@ -117,7 +104,6 @@ Mat add_object(Mat &background, Mat &object, Point center) {
 
 Mat sub_Bground(char *videoFile)
 {
-	Detector detector("yolo.cfg", "yolo.weights");
 	VideoCapture bgrCapture(videoFile);  // 영상 파일 읽기
 
 	vector<Mat> src;
@@ -187,16 +173,14 @@ Mat sub_Bground(char *videoFile)
 	t4.join();
 
 	check_Mat(des);
-	//Person person(des, first_vec);
 
-
-	imwrite("conclu.bmp", Img);
 	bgrCapture.release();
 	return des;
 }
 void add_ObjectToRes(Mat &des) {
-	Detector detector("yolo.cfg", "yolo.weights");
 	VideoCapture Capture("AA.mp4");  // 영상 파일 읽기
+	Mat Img, AImg;
+
 	if (!Capture.isOpened()) {
 		//error in opening the video input
 		cerr << "Unable to open video file: " << "tt" << endl;
@@ -208,9 +192,9 @@ void add_ObjectToRes(Mat &des) {
 		cerr << "Unable to open video file: " << "tt" << endl;
 		exit(EXIT_FAILURE);
 	}
-	Mat Img, AImg;
-	bgrCapture.read(Img); // 처프레임을 Img에 저장
 	Capture.read(AImg);
+	bgrCapture.read(Img); // 처프레임을 Img에 저장
+
 	vector<bbox_t> first_vec = detector.detect(Img); // 첫프레임의 사람 위치 저장
 	Person person(AImg, first_vec); // 첫프레임의 사람 가져오기
 
@@ -220,6 +204,8 @@ void add_ObjectToRes(Mat &des) {
 		des = add_object(des, object.frame, Point(object.vec.x + object.vec.w / 2, object.vec.y + object.vec.h / 2));
 	}
 	imwrite("result.bmp", des);
+	Capture.release();
+	bgrCapture.release();
 
 }
 
@@ -346,12 +332,11 @@ void copyMask(Mat &Img, Mat &result, Mat &mask) // copyTo 구현
 
 void capture_ROI(Mat &des, char *videoFile, char *saveFile)
 {
-
 	VideoCapture capture(videoFile);  // 영상 파일 읽기
 	VideoWriter vw;
 	float rate = 0.9;
+
 	vw = VideoWriter(saveFile, CV_FOURCC('D', 'I', 'V', 'X'), capture.get(CV_CAP_PROP_FPS), Size((int)capture.get(CV_CAP_PROP_FRAME_WIDTH), (int)capture.get(CV_CAP_PROP_FRAME_HEIGHT)), true);
-	//vw = VideoWriter(saveFile, CV_FOURCC('D', 'I', 'V', 'X'), capture.get(CV_CAP_PROP_FPS), Size((int)capture.get(CV_CAP_PROP_FRAME_WIDTH) * rate, (int)capture.get(CV_CAP_PROP_FRAME_HEIGHT)  * rate), true);
 
 	Mat Img = Mat(capture.get(CV_CAP_PROP_FRAME_HEIGHT), capture.get(CV_CAP_PROP_FRAME_WIDTH), CV_8UC3, Scalar(0, 0, 0));
 	Mat desMask = Mat(Img.rows, Img.cols, CV_8UC3, Scalar(0, 0, 0));
@@ -375,17 +360,10 @@ void capture_ROI(Mat &des, char *videoFile, char *saveFile)
 		cout << "동영상을 저장하기 위한 초기화 작업 중 에러 발생" << endl;
 		exit(1);
 	}
-	int  k = 0;
-	while (capture.read(Img))
-	{
+	while (capture.read(Img)) {
 		des.copyTo(res, desMask);
 		Img.copyTo(res, resMask);
-
-		//res = Img(Rect(Img.cols * (1 - rate) / 2, Img.rows * (1 - rate) / 2, Img.cols * rate, Img.rows* rate));
-
 		vw.write(res);
-
 	}
-	printf("end\n");
-	//vw.release();
+	vw.release();
 }
