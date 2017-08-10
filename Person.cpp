@@ -24,13 +24,15 @@ void Person::add_Person(Mat &Img, bbox_t vec)
 	obj_t tmp;
 	Mat tmpImg;
 	Img.copyTo(tmpImg);
+	vec.x = max((int)vec.x - 20, 0);
 	vec.y = max((int)vec.y - 50, 0);
 	vec.h = vec.h + 80;
+	vec.w = vec.w + 20;
 	if (vec.x + vec.w > Img.cols)
 		vec.w = Img.cols - vec.x;
 	if (vec.y + vec.h > Img.rows)
 		vec.h = Img.rows - vec.y;
-	tmp.frame = tmpImg(Rect(vec.x, vec.y, vec.w-1, vec.h-1));
+	tmp.frame = tmpImg(Rect(vec.x, vec.y, vec.w - 1, vec.h - 1));
 	tmp.vec = vec;
 	object.push_back(tmp);
 
