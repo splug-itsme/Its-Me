@@ -19,13 +19,16 @@ typedef struct Obj_t {
 }obj_t;
 class Person {
 	vector <obj_t> object;
-
-public :
+	vector <vector < obj_t> > groupPerson;
+	vector <int> groupNum;
+public:
 	Person::Person();
 	Person::Person(Mat &Img, vector<bbox_t> vec);
 	Person::~Person();
 	void add_Person(Mat &Img, bbox_t vec);
 	obj_t get_Person(int cnt);
+	vector <obj_t> get_Group(int cnt);
 	int size();
-
+	void make_Group();
+	bool cover_Area(bbox_t vec1, bbox_t vec2);
 };

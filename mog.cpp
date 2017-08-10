@@ -65,7 +65,7 @@ void show_result(std::vector<bbox_t> const result_vec, std::vector<std::string> 
 
 int main(int argc, char *argv[])
 {
-	char videoFile[50] = "group.mp4";
+	char videoFile[50] = "layered.mp4";
 	Mat des = sub_Bground(videoFile);
 
 	capture_ROI(des, videoFile, "AA.mp4");
@@ -160,7 +160,6 @@ Mat sub_Bground(char *videoFile)
 		copyMask(readImg, result, diff); // 물체 영역의 반전을 붙여넣는다.
 
 		frame.push_back(result);
-		imshow("result", result);
 		//if (cvWaitKey() == 27) continue; // break에서 바꿈 키입력받을때마다 프레임이동
 
 	}
@@ -177,6 +176,7 @@ Mat sub_Bground(char *videoFile)
 	check_Mat(des);
 
 	bgrCapture.release();
+	imshow("des", des);
 	imwrite("bground.bmp", des);
 	return des;
 }
@@ -203,13 +203,28 @@ void add_ObjectToRes(Mat &des, char *filename) {
 	imshow("des", des);
 	for (int k = 0; k < person.size(); k++) {
 		int c;
-		obj_t object = person.get_Person(k);
-		imshow("object", object.frame);
+		vector<obj_t> group = person.get_Group(k);
+
+		// 그룹을 모아놓은 검은배경의 이미지
+		Mat groupImg = Mat(AImg.rows, AImg.cols, CV_8UC3, Scalar(0, 0, 0));
+		Mat tmp = Mat(AImg.rows, AImg.cols, CV_8UC3, Scalar(0, 0, 0));;
+		Rect A = Rect(group[0].vec.x, group[0].vec.y, group[0].vec.w - 1, group[0].vec.h - 1);
+		Rect B;
+		for (int j = 0; j < group.size(); j++) {
+			B = Rect(group[j].vec.x, group[j].vec.y, group[j].vec.w - 1, group[j].vec.h - 1);
+			A = A | B;
+			rectangle(tmp, B, Scalar(255, 255, 255), FILLED);
+			AImg.copyTo(groupImg, tmp);
+		}
+		groupImg = groupImg(Rect(A));
+		imshow("group", groupImg);
 		while (c = cvWaitKey()) {
 			if (c == 27 || c == 'q')
 				break;
 			else {
-				des = add_object(des, object.frame, Point(object.vec.x + object.vec.w / 2, object.vec.y + object.vec.h / 2));
+				for (int i = 0; i < group.size(); i++) // 그룹의 모든 이미지 집어 넣기
+					des = add_object(des, group[i].frame, Point(group[i].vec.x + group[i].vec.w / 2, group[i].vec.y + group[i].vec.h / 2));
+
 				imshow("des", des);
 				break;
 			}
