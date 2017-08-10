@@ -46,11 +46,12 @@ Mat add_object(Mat &background, Mat &object, Point center);
 void make_Mask(Mat &res, vector<bbox_t> const result_vec);
 void check_Mat(Mat &mat);
 void capture_ROI(Mat &des, char *videoFile, char *saveFile);
-void add_ObjectToRes(Mat &des);
+void add_ObjectToRes(Mat &des, char *filename);
 
 
 Detector detector("yolo.cfg", "yolo.weights");
 
+float cutRate = 0.95; // 잘라낼 테두리 비율
 
 
 void show_result(std::vector<bbox_t> const result_vec, std::vector<std::string> const obj_names) {
@@ -64,10 +65,11 @@ void show_result(std::vector<bbox_t> const result_vec, std::vector<std::string> 
 
 int main(int argc, char *argv[])
 {
-	Mat des = sub_Bground("3.mp4");
+	char videoFile[50] = "group.mp4";
+	Mat des = sub_Bground(videoFile);
 
-	capture_ROI(des, "3.mp4", "AA.mp4");
-	add_ObjectToRes(des);
+	capture_ROI(des, videoFile, "AA.mp4");
+	add_ObjectToRes(des, videoFile);
 
 	//	//	; // break에서 바꿈 키입력받을때마다 프레임이동
 
@@ -158,8 +160,8 @@ Mat sub_Bground(char *videoFile)
 		copyMask(readImg, result, diff); // 물체 영역의 반전을 붙여넣는다.
 
 		frame.push_back(result);
-
-		//	if (cvWaitKey() == 27) continue; // break에서 바꿈 키입력받을때마다 프레임이동
+		imshow("result", result);
+		//if (cvWaitKey() == 27) continue; // break에서 바꿈 키입력받을때마다 프레임이동
 
 	}
 	int size = frame[0].rows / 4; // thread 생성
@@ -175,9 +177,10 @@ Mat sub_Bground(char *videoFile)
 	check_Mat(des);
 
 	bgrCapture.release();
+	imwrite("bground.bmp", des);
 	return des;
 }
-void add_ObjectToRes(Mat &des) {
+void add_ObjectToRes(Mat &des, char *filename) {
 	VideoCapture Capture("AA.mp4");  // 영상 파일 읽기
 	Mat Img, AImg;
 
@@ -186,24 +189,40 @@ void add_ObjectToRes(Mat &des) {
 		cerr << "Unable to open video file: " << "tt" << endl;
 		exit(EXIT_FAILURE);
 	}
-	VideoCapture bgrCapture("3.mp4");  // 영상 파일 읽기
+	VideoCapture bgrCapture(filename);  // 영상 파일 읽기
 	if (!Capture.isOpened()) {
 		//error in opening the video input
 		cerr << "Unable to open video file: " << "tt" << endl;
 		exit(EXIT_FAILURE);
 	}
 	Capture.read(AImg);
-	bgrCapture.read(Img); // 처프레임을 Img에 저장
+	bgrCapture.read(Img); // 첫프레임을 Img에 저장
 
 	vector<bbox_t> first_vec = detector.detect(Img); // 첫프레임의 사람 위치 저장
 	Person person(AImg, first_vec); // 첫프레임의 사람 가져오기
-
+	imshow("des", des);
 	for (int k = 0; k < person.size(); k++) {
-		if (waitKey() == 27);
+		int c;
 		obj_t object = person.get_Person(k);
-		des = add_object(des, object.frame, Point(object.vec.x + object.vec.w / 2, object.vec.y + object.vec.h / 2));
+		imshow("object", object.frame);
+		while (c = cvWaitKey()) {
+			if (c == 27 || c == 'q')
+				break;
+			else {
+				des = add_object(des, object.frame, Point(object.vec.x + object.vec.w / 2, object.vec.y + object.vec.h / 2));
+				imshow("des", des);
+				break;
+			}
+		}
+
+
 	}
+	if (cvWaitKey() == 27);
+
 	imwrite("result.bmp", des);
+	des = des(Rect(des.cols * (1 - cutRate) / 2, des.rows * (1 - cutRate) / 2, des.cols * cutRate, des.rows * cutRate));
+	imwrite("resultV2.bmp", des);
+
 	Capture.release();
 	bgrCapture.release();
 
@@ -334,7 +353,6 @@ void capture_ROI(Mat &des, char *videoFile, char *saveFile)
 {
 	VideoCapture capture(videoFile);  // 영상 파일 읽기
 	VideoWriter vw;
-	float rate = 0.9;
 
 	vw = VideoWriter(saveFile, CV_FOURCC('D', 'I', 'V', 'X'), capture.get(CV_CAP_PROP_FPS), Size((int)capture.get(CV_CAP_PROP_FRAME_WIDTH), (int)capture.get(CV_CAP_PROP_FRAME_HEIGHT)), true);
 
@@ -344,8 +362,8 @@ void capture_ROI(Mat &des, char *videoFile, char *saveFile)
 	Mat res = Mat(Img.rows, Img.cols, CV_8UC3, Scalar(0, 0, 0));
 
 
-	Point pt(Img.cols * (1 - rate) / 2, Img.rows * (1 - rate) / 2);
-	Rect rect(pt, Size(Img.cols * rate, Img.rows * rate));
+	Point pt(Img.cols * (1 - cutRate) / 2, Img.rows * (1 - cutRate) / 2);
+	Rect rect(pt, Size(Img.cols * cutRate, Img.rows * cutRate));
 	rectangle(desMask, rect, Scalar(255, 255, 255), FILLED);
 	rectangle(resMask, rect, Scalar(255, 255, 255), FILLED);
 	desMask = ~desMask;
