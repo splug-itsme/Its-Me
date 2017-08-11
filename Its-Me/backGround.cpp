@@ -116,7 +116,7 @@ Mat backGround::sub_Bground(char *videoFile)
 	check_Mat(des); // 배경에 300으로 채워진 수를 계산 즉 배경을 못 구한부분
 
 	bgrCapture.release();
-	//imshow("des", des);
+	imshow("des", des);
 	imwrite("bground.bmp", des);
 	return des;
 }
@@ -141,7 +141,7 @@ void backGround::add_ObjectToRes(Mat &des, char *filename) {
 	vector<bbox_t> first_vec = detector.detect(Img); // 첫프레임의 사람 위치 저장
 
 	Person person(AImg, first_vec); // 첫프레임의 사람 가져오기
-	//imshow("des", des);
+	imshow("des", des);
 
 	for (int k = 0; k < person.size(); k++) {
 		int c;
@@ -160,17 +160,17 @@ void backGround::add_ObjectToRes(Mat &des, char *filename) {
 		}
 		groupImg = groupImg(Rect(A));
 		//imshow("group", groupImg);
-		while (c = cvWaitKey()) {
+		/*while (c = cvWaitKey()) {
 			if (c == 27 || c == 'q')
 				break;
 			else {
 				for (int i = 0; i < group.size(); i++) // 그룹의 모든 이미지 집어 넣기
 					des = add_object(des, group[i].frame, Point(group[i].vec.x + group[i].vec.w / 2, group[i].vec.y + group[i].vec.h / 2));
 
-				//imshow("des", des);
+				imshow("des", des);
 				break;
 			}
-		}
+		}*/
 
 
 	}
