@@ -9,7 +9,7 @@ float cutRate = 0.95; // 잘라낼 테두리 비율
 */
 backGround::backGround()
 {
-<<<<<<< HEAD
+
 
 	//detector= detector("yolo.cfg", "yolo.weights");
 	char videoFile[50] = "sample2.mp4";
@@ -17,15 +17,6 @@ backGround::backGround()
 	Mat des = sub_Bground(videoFile);
 	capture_ROI(des, videoFile, "AA.mp4");
 	add_ObjectToRes(des, videoFile);
-	
-=======
-	char videoFile[50] = "layered.mp4";
-	Mat des = sub_Bground(videoFile); // 배경구하기
-
-	capture_ROI(des, videoFile, "AA.mp4"); // 영상의 테두리를 잘라서 AA.mp4에 테두리를 배경으로 채워서 저장하기
-	add_ObjectToRes(des, videoFile); // 배경에 videofile의 첫 사진을 가져와서 사람을 추가한다.
-
->>>>>>> 8fc07e197511461f47ae193941f1cae1daa84bc1
 	//	//	; // break에서 바꿈 키입력받을때마다 프레임이동
 
 	//	/*gray("3.mp4");*/
@@ -148,13 +139,10 @@ void backGround::add_ObjectToRes(Mat &des, char *filename) {
 	bgrCapture.read(Img); // 원본 영상에서 첫프레임을 Img에 저장
 
 	vector<bbox_t> first_vec = detector.detect(Img); // 첫프레임의 사람 위치 저장
-<<<<<<< HEAD
+
 	Person person(AImg, first_vec); // 첫프레임의 사람 가져오기
 	//imshow("des", des);
-=======
-	Person person(AImg, first_vec); // 첫프레임의 사람 가져오기 위치는 원본영상에서 가져오고 이미지는 테두리를 바꾼 영상에서 가져온다.
-	imshow("des", des);
->>>>>>> 8fc07e197511461f47ae193941f1cae1daa84bc1
+
 	for (int k = 0; k < person.size(); k++) {
 		int c;
 		vector<obj_t> group = person.get_Group(k);
