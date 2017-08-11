@@ -38,8 +38,10 @@ using namespace std;
 class backGround {
 
 public:
-
+	
 	backGround::backGround();
+
+	/*Background subtract*/
 	Mat sub_Bground(char *videoFile);
 	void changeGray(Mat &Img);
 	void copyMask(Mat &Img, Mat &result, Mat &mask);
