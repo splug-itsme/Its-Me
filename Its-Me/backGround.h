@@ -35,10 +35,11 @@
 using namespace cv;
 using namespace std;
 
+
 class backGround {
 
 public:
-
+	
 	backGround::backGround();
 	Mat sub_Bground(char *videoFile);
 	void changeGray(Mat &Img);

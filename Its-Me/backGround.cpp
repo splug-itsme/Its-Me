@@ -1,19 +1,20 @@
 #include"backGround.h"
 
+
 Detector detector("yolo.cfg", "yolo.weights");
-
-
 float cutRate = 0.95; // 잘라낼 테두리 비율
 
 //int main(int argc, char *argv[])
 backGround::backGround()
 {
-	char videoFile[50] = "layered.mp4";
-	Mat des = sub_Bground(videoFile);
 
+	//detector= detector("yolo.cfg", "yolo.weights");
+	char videoFile[50] = "sample2.mp4";
+	
+	Mat des = sub_Bground(videoFile);
 	capture_ROI(des, videoFile, "AA.mp4");
 	add_ObjectToRes(des, videoFile);
-
+	
 	//	//	; // break에서 바꿈 키입력받을때마다 프레임이동
 
 	//	/*gray("3.mp4");*/
@@ -37,7 +38,7 @@ void backGround::make_Mask(Mat &res, bbox_t const result_vec)
 	Rect rect(pt, Size(result_vec.w, result_vec.h));
 	rectangle(res, rect, Scalar(255, 255, 255), FILLED);
 
-	imshow("Mask", res);
+	//imshow("Mask", res);
 }
 Mat backGround::add_object(Mat &background, Mat &object, Point center) {
 	// center is object's center location
@@ -49,6 +50,7 @@ Mat backGround::add_object(Mat &background, Mat &object, Point center) {
 
 Mat backGround::sub_Bground(char *videoFile)
 {
+	
 	VideoCapture bgrCapture(videoFile);  // 영상 파일 읽기
 
 	vector<Mat> src;
@@ -119,14 +121,13 @@ Mat backGround::sub_Bground(char *videoFile)
 	check_Mat(des);
 
 	bgrCapture.release();
-	imshow("des", des);
+	//imshow("des", des);
 	imwrite("bground.bmp", des);
 	return des;
 }
 void backGround::add_ObjectToRes(Mat &des, char *filename) {
 	VideoCapture Capture("AA.mp4");  // 영상 파일 읽기
 	Mat Img, AImg;
-
 	if (!Capture.isOpened()) {
 		//error in opening the video input
 		cerr << "Unable to open video file: " << "tt" << endl;
@@ -143,7 +144,7 @@ void backGround::add_ObjectToRes(Mat &des, char *filename) {
 
 	vector<bbox_t> first_vec = detector.detect(Img); // 첫프레임의 사람 위치 저장
 	Person person(AImg, first_vec); // 첫프레임의 사람 가져오기
-	imshow("des", des);
+	//imshow("des", des);
 	for (int k = 0; k < person.size(); k++) {
 		int c;
 		vector<obj_t> group = person.get_Group(k);
@@ -160,7 +161,7 @@ void backGround::add_ObjectToRes(Mat &des, char *filename) {
 			AImg.copyTo(groupImg, tmp);
 		}
 		groupImg = groupImg(Rect(A));
-		imshow("group", groupImg);
+		//imshow("group", groupImg);
 		while (c = cvWaitKey()) {
 			if (c == 27 || c == 'q')
 				break;
@@ -168,7 +169,7 @@ void backGround::add_ObjectToRes(Mat &des, char *filename) {
 				for (int i = 0; i < group.size(); i++) // 그룹의 모든 이미지 집어 넣기
 					des = add_object(des, group[i].frame, Point(group[i].vec.x + group[i].vec.w / 2, group[i].vec.y + group[i].vec.h / 2));
 
-				imshow("des", des);
+				//imshow("des", des);
 				break;
 			}
 		}
