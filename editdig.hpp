@@ -13,7 +13,7 @@ public:
 	~editDig();
 	QDesktopWidget *dw;
 	QImage img;
-	QLabel * imglbl;
+
 	int width, height;
 
 	void addImgItem();

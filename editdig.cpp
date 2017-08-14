@@ -11,6 +11,7 @@ editDig::editDig(QWidget * parent) : QWidget(parent) {
 	ui.listWidget->setViewMode(QListWidget::IconMode);
 	ui.listWidget->setIconSize(QSize(200, 200));
 	ui.listWidget->setResizeMode(QListWidget::Adjust);
+	ui.listWidget->setSelectionMode(QListWidget::MultiSelection);
 
 	//ui.tableWidget = new QTableWidget(this);
 	//ui.tableWidget->setShowGrid(false);
@@ -40,12 +41,12 @@ void editDig::addImgItem() {
 	while (iterDir.hasNext())
 	{
 		iterDir.next();
-		list = new QListWidgetItem(QPixmap(iterDir.filePath()), "a");
+		list = new QListWidgetItem(QPixmap(iterDir.filePath()), "");
 		list->setFlags(Qt::ItemIsEditable | Qt::ItemIsEnabled);
 		ui.listWidget->addItem(list);
 
 	}
-
+	
 
 	/*int col = 0, row = 0, tem = 0;
 	QDir dir = QDir("imgData");
@@ -99,8 +100,12 @@ void editDig::addImgItem() {
 
 void editDig::checkItems(QListWidgetItem *item)
 {
+	QPixmap buf = item->icon().pixmap(QSize(32, 32));
+	ui.label->setPixmap(buf);
+
+	
 //	if(item->isSelected())
-	std::cout << (item->text()).toStdString() << std::endl;
+	//std::cout << (item->text()).toStdString() << std::endl;
 }
 
 void editDig::enterItem(QTableWidgetItem * item) {
