@@ -29,9 +29,10 @@ class Ui_MyClassClass
 public:
     QWidget *centralWidget;
     QPushButton *strBtn;
-    QPushButton *editBtn;
     QWidget *verticalLayoutWidget;
     QVBoxLayout *verticalLayout;
+    QPushButton *editBtn;
+    QPushButton *pushButton;
     QMenuBar *menuBar;
     QToolBar *mainToolBar;
     QStatusBar *statusBar;
@@ -40,15 +41,13 @@ public:
     {
         if (MyClassClass->objectName().isEmpty())
             MyClassClass->setObjectName(QStringLiteral("MyClassClass"));
+        MyClassClass->setEnabled(true);
         MyClassClass->resize(1115, 756);
         centralWidget = new QWidget(MyClassClass);
         centralWidget->setObjectName(QStringLiteral("centralWidget"));
         strBtn = new QPushButton(centralWidget);
         strBtn->setObjectName(QStringLiteral("strBtn"));
-        strBtn->setGeometry(QRect(20, 20, 79, 46));
-        editBtn = new QPushButton(centralWidget);
-        editBtn->setObjectName(QStringLiteral("editBtn"));
-        editBtn->setGeometry(QRect(110, 20, 79, 46));
+        strBtn->setGeometry(QRect(20, 20, 70, 50));
         verticalLayoutWidget = new QWidget(centralWidget);
         verticalLayoutWidget->setObjectName(QStringLiteral("verticalLayoutWidget"));
         verticalLayoutWidget->setGeometry(QRect(10, 10, 1091, 681));
@@ -57,13 +56,21 @@ public:
         verticalLayout->setContentsMargins(11, 11, 11, 11);
         verticalLayout->setObjectName(QStringLiteral("verticalLayout"));
         verticalLayout->setContentsMargins(0, 0, 0, 0);
+        editBtn = new QPushButton(centralWidget);
+        editBtn->setObjectName(QStringLiteral("editBtn"));
+        editBtn->setEnabled(false);
+        editBtn->setGeometry(QRect(100, 20, 70, 50));
+        pushButton = new QPushButton(centralWidget);
+        pushButton->setObjectName(QStringLiteral("pushButton"));
+        pushButton->setGeometry(QRect(180, 20, 70, 50));
         MyClassClass->setCentralWidget(centralWidget);
         verticalLayoutWidget->raise();
         strBtn->raise();
         editBtn->raise();
+        pushButton->raise();
         menuBar = new QMenuBar(MyClassClass);
         menuBar->setObjectName(QStringLiteral("menuBar"));
-        menuBar->setGeometry(QRect(0, 0, 1115, 26));
+        menuBar->setGeometry(QRect(0, 0, 1115, 21));
         MyClassClass->setMenuBar(menuBar);
         mainToolBar = new QToolBar(MyClassClass);
         mainToolBar->setObjectName(QStringLiteral("mainToolBar"));
@@ -74,6 +81,8 @@ public:
 
         retranslateUi(MyClassClass);
         QObject::connect(strBtn, SIGNAL(clicked()), MyClassClass, SLOT(newDig()));
+        QObject::connect(editBtn, SIGNAL(clicked()), MyClassClass, SLOT(newEdit()));
+        QObject::connect(pushButton, SIGNAL(clicked()), MyClassClass, SLOT(reStart()));
 
         QMetaObject::connectSlotsByName(MyClassClass);
     } // setupUi
@@ -83,6 +92,7 @@ public:
         MyClassClass->setWindowTitle(QApplication::translate("MyClassClass", "MyClass", 0));
         strBtn->setText(QApplication::translate("MyClassClass", "start", 0));
         editBtn->setText(QApplication::translate("MyClassClass", "edit", 0));
+        pushButton->setText(QApplication::translate("MyClassClass", "restart", 0));
     } // retranslateUi
 
 };

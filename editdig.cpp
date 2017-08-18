@@ -4,6 +4,7 @@
 #include <iostream>
 #include<qstring.h>
 #include<stdlib.h>
+
 editDig::editDig(QWidget * parent) : QWidget(parent) {
 	ui.setupUi(this);
 	dw = new QDesktopWidget();
@@ -15,21 +16,44 @@ editDig::editDig(QWidget * parent) : QWidget(parent) {
 	ui.listWidget->setResizeMode(QListWidget::Adjust);
 	ui.listWidget->setSelectionMode(QListWidget::MultiSelection);
 
-	//ui.tableWidget = new QTableWidget(this);
-	//ui.tableWidget->setShowGrid(false);
-	//ui.tableWidget->verticalHeader()->hide();
-	//ui.tableWidget->horizontalHeader()->hide();
-	//ui.tableWidget->setSizeAdjustPolicy(QTableWidget::AdjustToContents);
-	addImgItem();
-	//	this->resize(width, height);
-	this->show();
-
+	
+	//addImgItem();
+	
+//	this->show();
 }
 
 editDig::~editDig() {
 
 }
+void editDig::init(cv::Mat bg, Person per,cv::Mat AImg)
+{
+	for (int i = 0; i < 32; i++)
+		click[i] = false;
+
+	backG = bg;
+	editDig::AImg = AImg;
+	background = Mat2QImage(bg);
+	ui.label->setPixmap(QPixmap::fromImage(background));
+	QListWidgetItem *list;
+	editDig::per = per;
+	for (int k = 0; k < per.size(); k++) {
+		QImage qi= Mat2QImage(per.get_Person(k).frame);
+		list = new QListWidgetItem(QPixmap::fromImage(qi),NULL);
+		list->setFlags(Qt::ItemIsEditable | Qt::ItemIsEnabled);
+		ui.listWidget->addItem(list);
+	}
+
+
+	this->show();
+}
+void editDig::saveImg() {
+	QString name = QFileDialog::getSaveFileName(this, "save image", "untitle.png", "Images(*.png *.xpm *.jpg)");
+	ui.label->pixmap()->toImage().save(name);
+
+}
 void editDig::addImgItem() {
+	
+	
 	QStringList strFilters;
 
 	strFilters += "*.bmp";
@@ -49,74 +73,51 @@ void editDig::addImgItem() {
 	}
 }
 
-/*int col = 0, row = 0, tem = 0;
-QDir dir = QDir("imgData");
-QTableWidgetItem *thumbnail;
-QString str2[10][5];
-QFileInfoList list = dir.entryInfoList();
-
-for (int i = 0; i < list.size(); ++i) {
-	QFileInfo fileInfo = list.at(i);
-
-	if ((fileInfo.fileName().toStdString().compare(".") == 0) || (fileInfo.fileName().toStdString().compare("..") == 0))
-		continue;
-
-	if (fileInfo.isDir()) {
-		QFileInfoList list2 = QDir(fileInfo.filePath()).entryInfoList();
-		tem = 0;
-		for (int j = 0; j < list2.size(); j++) {
-			QFileInfo info2 = list2.at(j);
-			if (info2.isFile())
-			{
-				str2[row][tem] = info2.filePath();
-				tem++;
-			}
-		}
-		row++;
-		if (col < tem)
-			col = tem;
-	}
-
-}
-ui.tableWidget->setRowCount(row);
-ui.tableWidget->setColumnCount(col);
-
-for (int u = 0; u < row; u++)
-	for (int t = 0; t < col; t++)
-	{
-		thumbnail = new QTableWidgetItem();
-		thumbnail->setData(Qt::DecorationRole, QPixmap(str2[u][t]));
-		ui.tableWidget->setItem(u, t, thumbnail);
-
-	}
-
-
-for (int u = 0; u < row; u++)
-	ui.tableWidget->setRowHeight(u, (height / row));
-
-for (int u = 0; u < row; u++)
-	ui.tableWidget->setColumnWidth(u, (width / col));
-*/
-
 void editDig::checkItems(QListWidgetItem *item)
 {
-	int n = ui.listWidget->row(item);
-	/*QPixmap buf = item->icon().pixmap(QSize(32, 32));
-	ui.label->setPixmap(buf);
-*/
-	ui.label->setText(""+n);
-	std::cout << n;
 
+	int n = ui.listWidget->row(item);
+	//	ui.label->setText(""+n);
+	if (click[n] == false)
+		click[n] = true;
+	else
+		click[n] = false;
+
+	std::cout << n;
+	int c;
+	Mat backG2;
+	backG2 = backG;
+	for (int j = 0; j < 4; j++)
+	{	
+		if (click[j] == true)
+		{
+			group = per.get_Group(j);
+
+			for (int i = 0; i < group.size(); i++) // 그룹의 모든 이미지 집어 넣기
+				backG2 = add_object(backG2, group[i].frame, Point(group[i].vec.x + group[i].vec.w / 2, group[i].vec.y + group[i].vec.h / 2));
+		}
+
+		
+	}
+	QImage mid = Mat2QImage(backG2);
+	ui.label->setPixmap(QPixmap::fromImage(mid));
+	//imwrite("result.bmp", backG);
 }
 
-void editDig::enterItem(QTableWidgetItem * item) {
-	QGraphicsScene  *sc = new  QGraphicsScene();
-	QGraphicsView * grp = new QGraphicsView();
-	grp->setScene(sc);
-	QPixmap im = item->data(Qt::DecorationRole).value<QPixmap>();
-	sc->addPixmap(im);
-	grp->show();
+QImage  editDig::Mat2QImage(cv::Mat const& src)
+{
+	cv::Mat temp; // make the same cv::Mat
+	cvtColor(src, temp, CV_BGR2RGB); // cvtColor Makes a copt, that what i need
+	QImage dest((const uchar *)temp.data, temp.cols, temp.rows, temp.step, QImage::Format_RGB888);
+	dest.bits(); // enforce deep copy, see documentation 
+				 // of QImage::QImage ( const uchar * data, int width, int height, Format format )
+	return dest;
+}
 
-
-
+Mat editDig::add_object(Mat &background, Mat &object, Point center) {
+	// center is object's center location
+	Mat src_mask = 255 * Mat::ones(object.rows, object.cols, object.depth());
+	Mat result;
+	seamlessClone(object, background, src_mask, center, result, NORMAL_CLONE);
+	return result;
 }
