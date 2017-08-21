@@ -6,7 +6,7 @@ Person::Person()
 {
 
 }
-Person::Person(Mat &Img, vector<bbox_t> vec)
+Person::Person(Mat &Img, vector<bbox_t> vec) 
 {
 	for (auto &i : vec) {
 		add_Person(Img, i);
@@ -18,6 +18,7 @@ Person::Person(Mat &Img, vector<bbox_t> vec)
 		groupNum[i] = i;
 
 	make_Group();
+	make_Groupframe(Img);
 
 }
 
@@ -27,6 +28,7 @@ Person::~Person()
 int Person::size() {
 	return groupPerson.size();
 }
+
 void Person::add_Person(Mat &Img, bbox_t vec)
 {
 	obj_t tmp;
@@ -81,5 +83,27 @@ bool Person::cover_Area(bbox_t vec1, bbox_t vec2) {
 	if (C.width == 0 || C.height == 0)
 		return false;
 	return true;
+}
+void Person::make_Groupframe(Mat &firstFrame)
+{
+	for (int k = 0; k < groupPerson.size(); k++) {
+		int c;
+		vector<obj_t> group = groupPerson.at(k);
+
+		// 그룹을 모아놓은 검은배경의 이미지
+		Mat groupImg = Mat(firstFrame.rows, firstFrame.cols, CV_8UC3, Scalar(0, 0, 0));
+		Mat tmp = Mat(firstFrame.rows, firstFrame.cols, CV_8UC3, Scalar(0, 0, 0));;
+		Rect A = Rect(group[0].vec.x, group[0].vec.y, group[0].vec.w - 1, group[0].vec.h - 1);
+		Rect B;
+		for (int j = 0; j < group.size(); j++) {
+			B = Rect(group[j].vec.x, group[j].vec.y, group[j].vec.w - 1, group[j].vec.h - 1);
+			A = A | B;
+			rectangle(tmp, B, Scalar(255, 255, 255), FILLED);
+			firstFrame.copyTo(groupImg, tmp);
+		}
+		groupImg = groupImg(Rect(A));
+		groupFrame.push_back(groupImg);
+		imshow("group", groupImg);
+	}
 }
 // 만약에 겹쳐있으면 그것도 하나의 객체로 취급하도록하는 그러면 위치값을 여러개를 가지도록 vector만기들
