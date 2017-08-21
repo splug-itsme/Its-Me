@@ -37,7 +37,7 @@ void editDig::init(cv::Mat bg, Person per,cv::Mat AImg)
 	QListWidgetItem *list;
 	editDig::per = per;
 	for (int k = 0; k < per.size(); k++) {
-		QImage qi= Mat2QImage(per.get_Person(k).frame);
+		QImage qi= Mat2QImage(per.get_Frame(k));
 		list = new QListWidgetItem(QPixmap::fromImage(qi),NULL);
 		list->setFlags(Qt::ItemIsEditable | Qt::ItemIsEnabled);
 		ui.listWidget->addItem(list);
@@ -46,11 +46,7 @@ void editDig::init(cv::Mat bg, Person per,cv::Mat AImg)
 
 	this->show();
 }
-void editDig::saveImg() {
-	QString name = QFileDialog::getSaveFileName(this, "save image", "untitle.png", "Images(*.png *.xpm *.jpg)");
-	ui.label->pixmap()->toImage().save(name);
-
-}
+//void editDig::changeBack(cv::Mat) {}
 void editDig::addImgItem() {
 	
 	
@@ -72,7 +68,11 @@ void editDig::addImgItem() {
 		ui.listWidget->addItem(list);
 	}
 }
+void editDig::saveImg() {
 
+	QString name = QFileDialog::getSaveFileName(this, "save image", "untitle.png", "Images(*.png *.xpm *.jpg)");
+	ui.label->pixmap()->toImage().save(name);
+}
 void editDig::checkItems(QListWidgetItem *item)
 {
 

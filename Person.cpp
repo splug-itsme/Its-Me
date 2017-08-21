@@ -6,7 +6,7 @@ Person::Person()
 {
 
 }
-Person::Person(Mat &Img, vector<bbox_t> vec) 
+Person::Person(Mat &Img, vector<bbox_t> vec)
 {
 	for (auto &i : vec) {
 		add_Person(Img, i);
@@ -55,6 +55,10 @@ vector <obj_t> Person::get_Group(int cnt)
 {
 	return groupPerson.at(cnt);
 }
+Mat Person::get_Frame(int cnt) {
+	return groupFrame.at(cnt);
+}
+
 void Person::make_Group()
 {
 	for (int i = 0; i < object.size(); i++) {
@@ -103,7 +107,6 @@ void Person::make_Groupframe(Mat &firstFrame)
 		}
 		groupImg = groupImg(Rect(A));
 		groupFrame.push_back(groupImg);
-		imshow("group", groupImg);
 	}
 }
 // 만약에 겹쳐있으면 그것도 하나의 객체로 취급하도록하는 그러면 위치값을 여러개를 가지도록 vector만기들

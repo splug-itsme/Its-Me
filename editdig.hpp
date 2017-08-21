@@ -6,10 +6,9 @@
 #include <qlabel.h>
 #include <QTableWidget>
 #include <qdir.h>
-#include <QFileDialog>
 #include"Person.h"
 #include"editdig.hpp"
-
+#include <QFileDialog>
 class editDig : public QWidget {
 	Q_OBJECT
 

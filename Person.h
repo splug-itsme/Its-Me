@@ -1,3 +1,5 @@
+#ifndef PERSON_H
+#define PERSON_H
 #include <iostream>
 #include <iomanip> 
 #include <string>
@@ -22,12 +24,14 @@ class Person {
 	vector <vector < obj_t> > groupPerson;
 	vector <Mat> groupFrame;
 	vector <int> groupNum;
-public :
+public:
 	Person::Person();
 	Person::Person(Mat &Img, vector<bbox_t> vec);
 	Person::~Person();
 	void add_Person(Mat &Img, bbox_t vec);
 	obj_t get_Person(int cnt);
+	Mat get_Frame(int cnt);
+
 	vector <obj_t> get_Group(int cnt);
 	int size();
 	void make_Group();
@@ -35,3 +39,4 @@ public :
 	void make_Groupframe(Mat &firstFrame);
 
 };
+#endif // PERSON_H

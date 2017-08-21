@@ -41,8 +41,8 @@ class backGround {
 public:
 	
 	backGround::backGround();
-
-	/*Background subtract*/
+	Person person;
+	Mat bg, AImg;
 	Mat sub_Bground(char *videoFile);
 	void changeGray(Mat &Img);
 	void copyMask(Mat &Img, Mat &result, Mat &mask);

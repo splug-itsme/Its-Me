@@ -1,6 +1,5 @@
 #include"backGround.h"
 
-
 Detector detector("yolo.cfg", "yolo.weights");
 float cutRate = 0.95; // 잘라낼 테두리 비율
 
@@ -9,10 +8,10 @@ float cutRate = 0.95; // 잘라낼 테두리 비율
 */
 backGround::backGround()
 {
-
-
+	
+	//msgBox.show();
 	//detector= detector("yolo.cfg", "yolo.weights");
-	char videoFile[50] = "sample2.mp4";
+	char videoFile[50] = "1.mp4";
 	
 	Mat des = sub_Bground(videoFile);
 	capture_ROI(des, videoFile, "AA.mp4");
@@ -116,8 +115,9 @@ Mat backGround::sub_Bground(char *videoFile)
 	check_Mat(des); // 배경에 300으로 채워진 수를 계산 즉 배경을 못 구한부분
 
 	bgrCapture.release();
-	imshow("des", des);
+	//imshow("des", des);
 	imwrite("bground.bmp", des);
+	bg=des;
 	return des;
 }
 // 배경에 사람을 그려넣는다. des는 배경을 저장, 
@@ -140,8 +140,9 @@ void backGround::add_ObjectToRes(Mat &des, char *filename) {
 
 	vector<bbox_t> first_vec = detector.detect(Img); // 첫프레임의 사람 위치 저장
 
-	Person person(AImg, first_vec); // 첫프레임의 사람 가져오기
-	imshow("des", des);
+	person=Person(AImg, first_vec); // 첫프레임의 사람 가져오기
+	//imshow("des", des);
+	//person.get_Person(0).frame;
 
 	for (int k = 0; k < person.size(); k++) {
 		int c;
@@ -174,7 +175,7 @@ void backGround::add_ObjectToRes(Mat &des, char *filename) {
 
 
 	}
-	if (cvWaitKey() == 27);
+	//if (cvWaitKey() == 27);
 
 	imwrite("result.bmp", des); // 자르기 전 결과이미지 저장
 	des = des(Rect(des.cols * (1 - cutRate) / 2, des.rows * (1 - cutRate) / 2, des.cols * cutRate, des.rows * cutRate));

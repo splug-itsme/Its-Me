@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>928</width>
-    <height>656</height>
+    <width>1590</width>
+    <height>800</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -16,24 +16,72 @@
   <widget class="QListWidget" name="listWidget">
    <property name="geometry">
     <rect>
-     <x>685</x>
+     <x>1350</x>
      <y>10</y>
-     <width>241</width>
-     <height>641</height>
+     <width>221</width>
+     <height>721</height>
     </rect>
    </property>
+   <property name="flow">
+    <enum>QListView::TopToBottom</enum>
+   </property>
+   <property name="viewMode">
+    <enum>QListView::IconMode</enum>
+   </property>
   </widget>
-  <widget class="QLabel" name="label">
+  <widget class="QFrame" name="frame">
    <property name="geometry">
     <rect>
      <x>20</x>
-     <y>20</y>
-     <width>611</width>
-     <height>591</height>
+     <y>10</y>
+     <width>1301</width>
+     <height>771</height>
+    </rect>
+   </property>
+   <property name="frameShape">
+    <enum>QFrame::StyledPanel</enum>
+   </property>
+   <property name="frameShadow">
+    <enum>QFrame::Raised</enum>
+   </property>
+   <widget class="QLabel" name="label">
+    <property name="geometry">
+     <rect>
+      <x>0</x>
+      <y>0</y>
+      <width>1301</width>
+      <height>771</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+   </widget>
+  </widget>
+  <widget class="QPushButton" name="canBtn">
+   <property name="geometry">
+    <rect>
+     <x>1350</x>
+     <y>740</y>
+     <width>111</width>
+     <height>31</height>
     </rect>
    </property>
    <property name="text">
-    <string/>
+    <string>cancel</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="saveBtn">
+   <property name="geometry">
+    <rect>
+     <x>1470</x>
+     <y>740</y>
+     <width>101</width>
+     <height>31</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>save</string>
    </property>
   </widget>
  </widget>
@@ -56,9 +104,41 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>canBtn</sender>
+   <signal>clicked()</signal>
+   <receiver>editDig</receiver>
+   <slot>close()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>1389</x>
+     <y>753</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>1386</x>
+     <y>772</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>saveBtn</sender>
+   <signal>clicked()</signal>
+   <receiver>editDig</receiver>
+   <slot>saveImg()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>1531</x>
+     <y>764</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>1534</x>
+     <y>782</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
-  <slot>enterItem(QTableWidgetItem*)</slot>
   <slot>checkItems(QListWidgetItem*)</slot>
+  <slot>saveImg()</slot>
  </slots>
 </ui>
