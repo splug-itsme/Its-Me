@@ -1,5 +1,6 @@
 # Its-Me
-1. [설치환경](#설치환경)
+1. [설치환경] (#설치환경)
+2. [프로젝트 환경설정] (#프로젝트 환경설정)
 ## 설치환경
 본 모듈은 GUI 형태의 모듈로서 Window 환경에서 사용가능합니다.
 
@@ -19,3 +20,6 @@
 ### Visual Studio 2015 설치
  * [Visual Studio 2015 설치법](https://www.visualstudio.com/ko/vs/older-downloads/)
 	- 링크에서 2015버전 설치
+
+## 프로젝트 환경설정
+### Visual Studio 에서 Opencv 사용
