@@ -20,6 +20,11 @@
 ### Visual Studio 2015 설치
  * [Visual Studio 2015 설치법](https://www.visualstudio.com/ko/vs/older-downloads/)
 	- 링크에서 2015버전 설치
+### CUDA 설치
+ * [CUDA 설치법](https://developer.nvidia.com/cuda-downloads)
+	- CUDA 버전 8 권장
+	- 링크에서 설치
+
 
 ## 프로젝트 환경설정
 ### Visual Studio 에서 Opencv 사용
