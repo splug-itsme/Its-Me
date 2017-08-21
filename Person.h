@@ -20,8 +20,9 @@ typedef struct Obj_t {
 class Person {
 	vector <obj_t> object;
 	vector <vector < obj_t> > groupPerson;
+	vector <Mat> groupFrame;
 	vector <int> groupNum;
-public:
+public :
 	Person::Person();
 	Person::Person(Mat &Img, vector<bbox_t> vec);
 	Person::~Person();
@@ -31,4 +32,6 @@ public:
 	int size();
 	void make_Group();
 	bool cover_Area(bbox_t vec1, bbox_t vec2);
+	void make_Groupframe(Mat &firstFrame);
+
 };
