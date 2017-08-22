@@ -52,17 +52,17 @@ void MyClass::newDig() {
 	{
 		ui.strBtn->setText("save");
 
-		VideoCapture capture("sample2.mp4");
+		VideoCapture capture(0);
 
 	//	cam->stop();
 
-		//VideoWriter outputVideo;
+		VideoWriter outputVideo;
 		Mat frame;
 		//capture >> frame;
 		
 		Size *s = new Size((int)frame.cols, (int)frame.rows);
 
-		//outputVideo.open("video.avi", -1,15, *s, true);
+		outputVideo.open("video.avi", -1,15, *s, true);
 
 		/*if (!outputVideo.isOpened())
 		{
@@ -72,11 +72,11 @@ void MyClass::newDig() {
 
 		//outputVideo.open("video.avi", -1,15, *s, true);
 
-	//	if (!outputVideo.isOpened())
-	//	{
-	//		cout << "동영상을 저장하기 위한 초기화 작업 중 에러 발생" << endl;
-	//		return ;
-	//	}
+		if (!outputVideo.isOpened())
+		{
+			cout << "동영상을 저장하기 위한 초기화 작업 중 에러 발생" << endl;
+			return ;
+		}
 
 
 		if (!capture.isOpened())
@@ -92,8 +92,8 @@ void MyClass::newDig() {
 		namedWindow("Cam", 1);
 		int i = 0;
 
-		int fps=0;
-		fps = capture.get(CV_CAP_PROP_FPS);
+		int fps=30;
+		//fps = capture.get(CV_CAP_PROP_FPS);
 		//backGround bg;
 
 
@@ -108,7 +108,7 @@ void MyClass::newDig() {
 			if (!capture.read(frame))
 				return;		
 		
-			//outputVideo << frame;
+			outputVideo << frame;
 		
 			//화면에 영상을 보여줌
 			imshow("Cam", frame);
@@ -126,11 +126,14 @@ void MyClass::newDig() {
 				break;
 			}
 		}
+
+		outputVideo.release();
+
 		QMessageBox msgbox;
 		msgbox.setText("aaaaaaaaaaaaaaaaaaaaaaaaaaa");
 		msgbox.setWindowTitle("making...");
 		msgbox.show();
-		backGround bg = backGround();
+		backGround bg = backGround("video.avi");
 		back = bg.bg;
 		per = bg.person;
 		msgbox.setWindowTitle("complete");

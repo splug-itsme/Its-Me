@@ -40,7 +40,7 @@ class backGround {
 
 public:
 	
-	backGround::backGround();
+	backGround::backGround(char *videoFile);
 	Person person;
 	Mat bg, AImg;
 	Mat sub_Bground(char *videoFile);

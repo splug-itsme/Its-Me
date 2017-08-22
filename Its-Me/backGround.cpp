@@ -6,12 +6,12 @@ float cutRate = 0.95; // 잘라낼 테두리 비율
 //int main(int argc, char *argv[])
 /* 배경을 구하기 위해서 영상을 읽어와 yolo 실행 및 배경 연산 수행
 */
-backGround::backGround()
+backGround::backGround(char *videoFile)
 {
 	
 	//msgBox.show();
 	//detector= detector("yolo.cfg", "yolo.weights");
-	char videoFile[50] = "1.mp4";
+	//char videoFile[50] = "1.mp4";
 	
 	Mat des = sub_Bground(videoFile);
 	capture_ROI(des, videoFile, "AA.mp4");
