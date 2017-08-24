@@ -27,4 +27,4 @@
 
 
 ## 프로젝트 환경설정
-### Visual Studio 에서 Qt 사용
+### Visual_Studio 에서 Qt 사용
