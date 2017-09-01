@@ -31,10 +31,9 @@
 #include <algorithm>
 
 #define DEGREE 10
+#define RECURSIVE_COUNT 10
 
-using namespace cv;
 using namespace std;
-
 
 class backGround {
 
@@ -42,16 +41,16 @@ public:
 	
 	backGround::backGround(char *videoFile);
 	Person person;
-	Mat bg, AImg;
-	Mat sub_Bground(char *videoFile);
-	void changeGray(Mat &Img);
-	void copyMask(Mat &Img, Mat &result, Mat &mask);
-	static void backGround::cal_Degree(Mat &des, vector <Mat> &frame, int start, int end);
-	static int backGround::return_Max(vector <int> &agrDegree);
-	Mat add_object(Mat &background, Mat &object, Point center);
-	void make_Mask(Mat &res, vector<bbox_t> const result_vec);
-	void make_Mask(Mat &res, bbox_t const result_vec);
-	void backGround::check_Mat(Mat &mat);
-	void capture_ROI(Mat &des, char *videoFile, char *saveFile);
-	void add_ObjectToRes(Mat &des, char *filename);
+	cv::Mat bg, AImg;
+	cv::Mat sub_Bground(char *videoFile);
+	void changeGray(cv::Mat &Img);
+	void copyMask(cv::Mat &Img, cv::Mat &result, cv::Mat &mask);
+	static void backGround::cal_Degree(cv::Mat &des, std::vector <cv::Mat> &frame, int start, int end);
+	static int backGround::return_Max(std::vector <int> &agrDegree);
+	cv::Mat add_object(cv::Mat &background, cv::Mat &object, cv::Point center);
+	void make_Mask(cv::Mat &res, std::vector<bbox_t> const result_vec);
+	void make_Mask(cv::Mat &res, bbox_t const result_vec);
+	void backGround::check_Mat(cv::Mat &mat);
+	void capture_ROI(cv::Mat &des, char *videoFile, char *saveFile);
+	void add_ObjectToRes(cv::Mat &des, char *filename);
 };
