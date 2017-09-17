@@ -54,6 +54,7 @@ public:
 	void make_Mask(cv::Mat &res, bbox_t const result_vec);
 	void backGround::check_Mat(cv::Mat &mat);
 	void capture_ROI(cv::Mat &des, char *videoFile, char *saveFile);
+	void save_ROI(cv::Mat &Img, const std::vector <bbox_t> vec);
 	void add_ObjectToRes(cv::Mat &des, char *filename);
 };
 

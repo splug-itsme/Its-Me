@@ -6,7 +6,7 @@ Person::Person()
 {
 
 }
-Person::Person(cv::Mat &Img, std::vector <cv::Mat> &imgSet, std::vector<bbox_t> vec)
+Person::Person(cv::Mat &Img, std::vector <cv::Mat> &imgSet, std::vector<bbox_t> vec) // emotuon detect를 하여 group을 만드는 생성자
 {
 	tmpObject.resize(vec.size());
 	for (int i = 0; i < imgSet.size(); i++) {
@@ -27,7 +27,7 @@ Person::Person(cv::Mat &Img, std::vector <cv::Mat> &imgSet, std::vector<bbox_t> 
 }
 
 
-Person::Person(cv::Mat &Img, std::vector<bbox_t> vec)
+Person::Person(cv::Mat &Img, std::vector<bbox_t> vec) // emotion detect를 하지않고 group을 만드는 생성자
 {
 	for (auto &i : vec) {
 		add_Person(Img, i);
@@ -46,7 +46,7 @@ Person::Person(cv::Mat &Img, std::vector<bbox_t> vec)
 Person::~Person()
 {
 }
-int Person::size() {
+int Person::size() { // group으로 나뉜 집단의 수를 반환
 	return groupPerson.size();
 }
 void Person::make_tmpObject(cv::Mat &Img, bbox_t vec, int imgNum, int objNum)
@@ -66,8 +66,6 @@ void Person::make_tmpObject(cv::Mat &Img, bbox_t vec, int imgNum, int objNum)
 		vec.h = Img.rows - vec.y;
 	tmp.frame = tmpImg(Rect(vec.x, vec.y, vec.w - 1, vec.h - 1));
 	tmp.vec = vec;
-	//sprintf(filename, "file_%d_%d.jpg", imgNum, objNum);
-	//imwrite(filename, tmp.frame);
 	tmpObject[objNum].push_back(tmp);
 }
 void Person::cal_Emotion() {
@@ -76,16 +74,16 @@ void Person::cal_Emotion() {
 		std::vector <cv::Mat> fnameMat(tmpObject[j].size());
 
 		for (int i = 0; i < tmpObject[j].size(); i++) { // 이미지의 수
-			fnameVec[i] = new char[100]; // 저장용
+#ifdef SAVE_TEST_FILES // test용 중간산출물 저장
+			fnameVec[i] = new char[100];
 			sprintf(fnameVec[i], "file_%d_%d.jpg", i, j);
 			imwrite(fnameVec[i], tmpObject[j][i].frame);
-
+#endif
 			fnameMat[i] = tmpObject[j][i].frame;
 		}
-		face_change ff = face_change(fnameMat);
-		//face_change ff = face_change(fnameVec);
-		printf("ff %d\n", ff.faceN);
-		if (ff.faceN == -1)
+		face_change ff = face_change(fnameMat); // 감정이 가장 happy한 이미지 찾기
+		printf("faceNum : %d\n", ff.faceN);
+		if (ff.faceN == -1) // 얼굴감정을 못잡으면 첫번째 사진
 			optObject.push_back(tmpObject[j][0]);
 		else
 			optObject.push_back(tmpObject[j][ff.faceN]);
@@ -95,7 +93,7 @@ void Person::cal_Emotion() {
 	}
 }
 
-void Person::add_Person(cv::Mat &Img, bbox_t vec)
+void Person::add_Person(cv::Mat &Img, bbox_t vec) // Person의 object에 사람하나를 추가함.
 {
 	obj_t tmp;
 	cv::Mat tmpImg;
@@ -113,7 +111,7 @@ void Person::add_Person(cv::Mat &Img, bbox_t vec)
 	object.push_back(tmp);
 }
 
-obj_t Person::get_Person(int cnt)
+obj_t Person::get_Person(int cnt) // object중 하나를 가져옴
 {
 	return object.at(cnt);
 }
@@ -162,7 +160,6 @@ void Person::make_Groupframe(cv::Mat &firstFrame)
 
 		// 그룹을 모아놓은 검은배경의 이미지
 		Mat groupImg = Mat(firstFrame.rows, firstFrame.cols, CV_8UC3, Scalar(0, 0, 0));
-		Mat tmp = Mat(firstFrame.rows, firstFrame.cols, CV_8UC3, Scalar(0, 0, 0));
 		Rect A = Rect(group[0].vec.x, group[0].vec.y, group[0].vec.w - 1, group[0].vec.h - 1);
 		Rect B;
 		for (int j = 0; j < group.size(); j++) {

@@ -1,27 +1,15 @@
 #include"backGround.h"
 
-Detector detector("yolo.cfg", "yolo.weights");
+Detector detector("./data/yolo.cfg", "./data/yolo.weights");
 float cutRate = 0.95; // 잘라낼 테두리 비율
 
-					  //int main(int argc, char *argv[])
-					  /* 배경을 구하기 위해서 영상을 읽어와 yolo 실행 및 배경 연산 수행
-					  */
+
+ /* 배경을 구하기 위해서 영상을 읽어와 yolo 실행 및 배경 연산 수행 */
 backGround::backGround(char *videoFile)
 {
-
-	//msgBox.show();
-	//detector= detector("yolo.cfg", "yolo.weights");
-	//char videoFile[50] = "1.mp4";
-
 	cv::Mat des = sub_Bground(videoFile);
 	capture_ROI(des, videoFile, "AA.mp4");
 	add_ObjectToRes(des, videoFile);
-	//	//	; // break에서 바꿈 키입력받을때마다 프레임이동
-
-	//	/*gray("3.mp4");*/
-	//	cvDestroyWindow("tt");
-
-	//return 0;
 }
 // res Mat에 흰색으로 사람을 채운다. 즉 마스킹하기
 void backGround::make_Mask(cv::Mat &res, std::vector<bbox_t> const result_vec)
@@ -39,8 +27,13 @@ void backGround::make_Mask(cv::Mat &res, bbox_t const result_vec)
 	cv::Point pt(result_vec.x, result_vec.y);
 	cv::Rect rect(pt, cv::Size(result_vec.w, result_vec.h));
 	cv::rectangle(res, rect, cv::Scalar(255, 255, 255), cv::FILLED);
-
-	//imshow("Mask", res);
+}
+void backGround::save_ROI(cv::Mat &Img, const std::vector <bbox_t> vec)
+{
+	for (auto &i : vec) {
+		cv::Point pt(i.x, i.y);
+		cv::rectangle(Img, pt, cv::Point(i.x + i.w, i.y + i.h), cv::Scalar(0, 0, 255), 3);
+	}
 }
 // 배경에 객체를 center좌표를 중심으로 붙여넣는다.
 cv::Mat backGround::add_object(cv::Mat &background, cv::Mat &object, cv::Point center) {
@@ -54,6 +47,10 @@ cv::Mat backGround::add_object(cv::Mat &background, cv::Mat &object, cv::Point c
 cv::Mat backGround::sub_Bground(char *videoFile)
 {
 	cv::VideoCapture bgrCapture(videoFile);  // 영상 파일 읽기
+#ifdef SAVE_ROI_VIDEO
+	cv::VideoWriter vw;
+	vw = cv::VideoWriter("ROIvideo.mp4", CV_FOURCC('D', 'I', 'V', 'X'), 5, cv::Size((int)bgrCapture.get(CV_CAP_PROP_FRAME_WIDTH), (int)bgrCapture.get(CV_CAP_PROP_FRAME_HEIGHT)), true);
+#endif
 
 	std::vector<cv::Mat> src;
 	cv::Mat des;
@@ -67,7 +64,7 @@ cv::Mat backGround::sub_Bground(char *videoFile)
 
 
 	cv::Mat Img;
-	bgrCapture.read(Img); // 처프레임을 Img에 저장
+	bgrCapture.read(Img); // 첫프레임을 Img에 저장
 	cv::Mat readImg = cv::Mat(Img.rows, Img.cols, CV_32SC3, cv::Scalar(0, 0, 0)); //  읽은 이미지를 저장할 Mat
 	des = cv::Mat(Img.rows, Img.cols, CV_8UC3, cv::Scalar(0, 0, 0)); // 결과를 저장할 Mat
 
@@ -82,12 +79,19 @@ cv::Mat backGround::sub_Bground(char *videoFile)
 		std::vector<bbox_t> result_vec = detector.detect(readImg);
 		cv::Mat diff = cv::Mat(Img.rows, Img.cols, CV_8UC3, cv::Scalar(0, 0, 0)); // 객체를 흰색으로 채운후 저장할 Mat
 		cv::Mat result = cv::Mat(Img.rows, Img.cols, CV_32SC3, cv::Scalar(0, 0, 0)); // 객체를 제외한 사진을 가져와 저장
+#ifdef SAVE_ROI_VIDEO
+		cv::Mat tmp = readImg.clone();
+#endif
 		for (auto vec : result_vec) {
 			vec.x = max((int)vec.x - 20, 0);
 			vec.y = max((int)vec.y - 50, 0);
 			vec.h = vec.h + 100;
 			vec.w = vec.w + 50;
 		}
+#ifdef SAVE_ROI_VIDEO
+		save_ROI(tmp, result_vec);
+		vw.write(tmp);
+#endif
 
 		make_Mask(diff, result_vec); // diff에 객체를 흰색으로 채워넣는다.
 		copyMask(readImg, result, diff); // 물체 영역의 반전을 붙여넣는다.
@@ -96,7 +100,11 @@ cv::Mat backGround::sub_Bground(char *videoFile)
 								 //if (cvWaitKey() == 27) continue; // break에서 바꿈 키입력받을때마다 프레임이동
 
 	}
-	int size = frame[0].rows / 4; // thread 생성
+#ifdef SAVE_ROI_VIDEO
+	vw.release();
+#endif
+
+	int size = frame[0].rows / 4; // thread 생성 연산시간을 줄이기위해 분산으로 연산
 	thread t1(&cal_Degree, des, frame, 0, size);
 	thread t2(&cal_Degree, des, frame, size, size * 2);
 	thread t3(&cal_Degree, des, frame, size * 2, size * 3);
@@ -109,7 +117,6 @@ cv::Mat backGround::sub_Bground(char *videoFile)
 	check_Mat(des); // 배경에 300으로 채워진 수를 계산 즉 배경을 못 구한부분
 
 	bgrCapture.release();
-	//imshow("des", des);
 	imwrite("bground.bmp", des);
 	bg = des;
 	return des;
@@ -121,32 +128,35 @@ void backGround::add_ObjectToRes(cv::Mat &des, char *filename) {
 
 	if (!Capture.isOpened()) {
 		//error in opening the video input
-		cerr << "Unable to open video file: " << "tt" << endl;
+		cerr << "Unable to open video file: " << filename << endl;
 		exit(EXIT_FAILURE);
 	}
 	cv::VideoCapture bgrCapture(filename);  // 영상 파일 읽기
 	if (!Capture.isOpened()) {
 		//error in opening the video input
-		cerr << "Unable to open video file: " << "tt" << endl;
+		cerr << "Unable to open video file: " << filename << endl;
 		exit(EXIT_FAILURE);
 	}
 	Capture.read(AImg); // 테두리가 배경으로 채워진 영상에서 읽어서 저장
 	bgrCapture.read(Img); // 원본 영상에서 첫프레임을 Img에 저장
 
 	std::vector<bbox_t> first_vec = detector.detect(Img); // 첫프레임의 사람 위치 저장
-	std::vector <cv::Mat> AAA;
+	std::vector <cv::Mat> emotionImg; // 감정연산을 위한 이미지 벡터
 
-	AAA.push_back(Img);
+	emotionImg.push_back(Img);
 	for (int i = 0; i < RECURSIVE_COUNT; i++) { //  RECURSIVE_COUNT  = 30
 		cv::Mat tmpImg;
 		bgrCapture.read(tmpImg);
-		AAA.push_back(tmpImg);
+		emotionImg.push_back(tmpImg);
 	}
-	person = Person(AImg, AAA, first_vec); // 수정한 후 person
+#ifdef DETECT_EMOTION
+	person = Person(AImg, emotionImg, first_vec); //  emotion detect person
+#else
+	person = Person(AImg, first_vec); // NOT detect_emotion 
+#endif
 
-	imwrite("result.bmp", des); // 자르기 전 결과이미지 저장
 	des = des(cv::Rect(des.cols * (1 - cutRate) / 2, des.rows * (1 - cutRate) / 2, des.cols * cutRate, des.rows * cutRate));
-	imwrite("resultV2.bmp", des); // 자른 후 결과 이미지 저장
+	imwrite("backGround.bmp", des); // 자른 후 결과 이미지 저장
 
 	Capture.release();
 	bgrCapture.release();
@@ -158,22 +168,19 @@ void backGround::cal_Degree(cv::Mat &des, std::vector <cv::Mat> &frame, int star
 
 
 	printf("%d %d %d\n", frame.size(), start, end);
-
-
-	std::vector <cv::Mat> tmp;
-
+	std::vector <cv::Mat> tmp; // 연산을 위한 임시 Mat vector
 	tmp.resize(frame.size());
 
 	for (int i = 0; i < frame.size(); i++)
 		frame[i].convertTo(tmp[i], CV_8UC3);
 
-	cv::Vec3b* desMat = (cv::Vec3b*)des.data;
+	cv::Vec3b* desMat = (cv::Vec3b*)des.data; // 3채널 byte크기의 Vec클래스 type으로 이미지의 data 멤버를 가리킴
 	for (int i = start; i < end; i++) {
 		for (int j = 0; j < frame[0].cols; j++) {
 			std::vector <int> agrDegree(frame.size(), 0);
 			for (int k = 0; k < frame.size(); k++) {
 				for (int t = k + 1; t < frame.size(); t++) {
-					cv::Vec3i* data = (cv::Vec3i*)frame[k].data;
+					cv::Vec3i* data = (cv::Vec3i*)frame[k].data; // 255이상의(= byte단위) 값을 비교하기 위해 integer type으로 Vec생성
 					cv::Vec3i* data2 = (cv::Vec3i*)frame[t].data;
 					if (data[i * frame[0].cols + j] == cv::Vec3i(300, 300, 300)) {
 						continue;
@@ -203,7 +210,7 @@ void backGround::check_Mat(cv::Mat &mat)
 
 		}
 	}
-	printf("k : %d\n", k);
+	printf("300 data counts : %d\n", k);
 }
 // 일치도 최대값을 가진 프레임 번호 반환
 int backGround::return_Max(std::vector <int> &agrDegree)
@@ -225,7 +232,7 @@ void backGround::changeGray(cv::Mat &Img)
 		for (int j = 0; j < Img.cols; j++) {
 			if (data[i * Img.cols + j][0] == 255 || data[i * Img.cols + j][1] == 255 || data[i * Img.cols + j][2] == 255)  // 빨간색 맞으면
 			{
-				data[i * Img.cols + j] = cv::Vec3b(255, 255, 255); // 흰색으로 바꿔
+				data[i * Img.cols + j] = cv::Vec3b(255, 255, 255); // 흰색으로 바꿔주기
 			}
 		}
 	}
@@ -234,8 +241,8 @@ void backGround::changeGray(cv::Mat &Img)
 void backGround::copyMask(cv::Mat &Img, cv::Mat &result, cv::Mat &mask) // copyTo 구현
 {
 	Img.convertTo(Img, CV_32SC3);
-	cv::Vec3b* maskData = (cv::Vec3b*)mask.data;
-	cv::Vec3i* ImgData = (cv::Vec3i*)Img.data;
+	cv::Vec3b* maskData = (cv::Vec3b*)mask.data; 
+	cv::Vec3i* ImgData = (cv::Vec3i*)Img.data; // mask 부분은 255이상의 값을 채워넣도록 하기위해 integer type으로 생성한다.
 	cv::Vec3i* resData = (cv::Vec3i*)result.data;
 
 	for (int i = 0; i < mask.rows; i++) {

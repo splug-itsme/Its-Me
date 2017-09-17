@@ -38,13 +38,9 @@ typedef normalized_function<probabilistic_funct_type> pfunct_type;
 class face_change {
 public:
 	int faceN;
-
 	face_change::face_change();
 	face_change::face_change(std::vector<char *> filename);
 	face_change::face_change(std::vector<cv::Mat> face);
-	int detectFaceAndCrop(char *imageName);
-	//int detectFaceAndCrop(cv::Mat &des);
-	std::vector<sample_type> getAllAttributes(int noOfFaces);
 	std::vector<sample_type> getAllAttributes(cv::Mat &face);
 
 	double length(point a, point b);
