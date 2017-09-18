@@ -87,6 +87,7 @@ void Person::cal_Emotion() {
 			optObject.push_back(tmpObject[j][0]);
 		else
 			optObject.push_back(tmpObject[j][ff.faceN]);
+		
 		imwrite("emotion.bmp", optObject[j].frame);
 		imwrite("original.bmp", tmpObject[j][0].frame);
 

@@ -138,8 +138,8 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
-      <PreprocessorDefinitions>CUDNN;UNICODE;WIN32;_WINDOWS;NDEBUG;ENABLE_ASSERTS;DLIB_JPEG_SUPPORT;DLIB_PNG_SUPPORT;CMAKE_INTDIR="Release";QT_DLL;QT_CORE_LIB;QT_GUI_LIB;QT_MULTIMEDIA_LIB;QT_MULTIMEDIAWIDGETS_LIB;QT_WIDGETS_LIB;_MBCS;%(PreprocessorDefinitions);_CRT_SECURE_NO_WARNINGS</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>C:\Users\이유정\Desktop\dlib-master;C:\opencv\build\include;C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v8.0\include;C:\Users\이유정\Desktop\darknet-master\src;.\GeneratedFiles;.;$(QTDIR)\include;.\GeneratedFiles\$(ConfigurationName);$(QTDIR)\include\QtCore;$(QTDIR)\include\QtGui;$(QTDIR)\include\QtMultimedia;$(QTDIR)\include\QtMultimediaWidgets;$(QTDIR)\include\QtWidgets;..\..\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>SAVE_TEST_FILES;DETECT_EMOTION;CUDNN;UNICODE;WIN32;_WINDOWS;NDEBUG;ENABLE_ASSERTS;DLIB_JPEG_SUPPORT;DLIB_PNG_SUPPORT;CMAKE_INTDIR="Release";QT_DLL;QT_CORE_LIB;QT_GUI_LIB;QT_MULTIMEDIA_LIB;QT_MULTIMEDIAWIDGETS_LIB;QT_WIDGETS_LIB;_MBCS;%(PreprocessorDefinitions);_CRT_SECURE_NO_WARNINGS</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\..\;C:\opencv\build\include;C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v8.0\include;.\GeneratedFiles;.;$(QTDIR)\include;.\GeneratedFiles\$(ConfigurationName);$(QTDIR)\include\QtCore;$(QTDIR)\include\QtGui;$(QTDIR)\include\QtMultimedia;$(QTDIR)\include\QtMultimediaWidgets;$(QTDIR)\include\QtWidgets;..\..\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat />
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <TreatWChar_tAsBuiltInType>true</TreatWChar_tAsBuiltInType>
@@ -147,7 +147,7 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <OutputFile>$(OutDir)\$(ProjectName).exe</OutputFile>
-      <AdditionalLibraryDirectories>C:\Users\이유정\Desktop\build\dlib_build\Release;C:\opencv\build\x64\vc14\lib;C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v8.0\lib\x64;$(QTDIR)\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>.\x64;C:\opencv\build\x64\vc14\lib;C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v8.0\lib\x64;$(QTDIR)\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>false</GenerateDebugInformation>
       <AdditionalDependencies>dlib.lib;opencv_world310.lib;qtmain.lib;Qt5Core.lib;Qt5Gui.lib;Qt5Multimedia.lib;Qt5MultimediaWidgets.lib;Qt5Widgets.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>

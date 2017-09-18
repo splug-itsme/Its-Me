@@ -39,8 +39,10 @@ face_change::face_change(std::vector<cv::Mat> face)
 		samples = getAllAttributes(face[i]);
 
 		std::vector<double> prob;
-		if (samples.size() == 0) // 얼굴 못잡으면 넘어감
+		if (samples.size() == 0) { // 얼굴 못잡으면 넘어감
+			happySize.push_back(0);
 			continue;
+		}
 		prob = svmMulticlass(samples[0]);
 		prob = probablityCalculator(prob);
 		cout << "probablity that face " << " is Neutral  :" << prob[0] << endl;
@@ -164,6 +166,8 @@ int face_change::find_Num(std::vector<double> happySize)
 	if (happySize.size() == 0) // 못찾을 경우
 		return -1;
 	double maxX = *max_element(happySize.begin(), happySize.end());
+	if (maxX < 0.01)
+		return -1;
 	for (int i = 0; i < happySize.size(); i++)
 	{
 		if (maxX == happySize[i])
