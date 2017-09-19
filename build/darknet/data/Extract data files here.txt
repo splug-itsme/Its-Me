@@ -1,0 +1,2 @@
+https://drive.google.com/file/d/0Bz4K5ZksOqu7aFh3S0tRVVpTcFE/view?usp=sharing
+위 링크의 파일들을 프로젝트 내의 Its-Me\build\darknet\data 에 압축파일을 푼다.
