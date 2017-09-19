@@ -16,12 +16,7 @@ editDig::editDig(QWidget * parent) : QWidget(parent) {
 	ui.listWidget->setIconSize(QSize(200, 200));
 	ui.listWidget->setResizeMode(QListWidget::Adjust);
 	ui.listWidget->setSelectionMode(QListWidget::MultiSelection);
-	//this->resize(dw->geometry().width(), dw->geometry().height());
-
-	//addImgItem();
-	
-//	this->show();
-}
+	}
 
 editDig::~editDig() {
 
@@ -56,7 +51,6 @@ void editDig::checkItems(QListWidgetItem *item)
 {
 
 	int n = ui.listWidget->row(item);
-	//	ui.label->setText(""+n);
 	if (click[n] == false)
 		click[n] = true;
 	else
@@ -82,7 +76,6 @@ void editDig::checkItems(QListWidgetItem *item)
 
 	QImage mid = Mat2QImage(backG2(cv::Rect(backG2.cols * (1 - cutRate) / 2, backG2.rows * (1 - cutRate) / 2, backG2.cols * cutRate, backG2.rows * cutRate)));
 	ui.label->setPixmap(QPixmap::fromImage(mid).scaled(ui.label->size()));
-	//imwrite("result.bmp", backG);
 }
 
 QImage  editDig::Mat2QImage(cv::Mat const& src)

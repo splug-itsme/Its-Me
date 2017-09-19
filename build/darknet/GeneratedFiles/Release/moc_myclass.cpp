@@ -19,8 +19,8 @@
 
 QT_BEGIN_MOC_NAMESPACE
 struct qt_meta_stringdata_MyClass_t {
-    QByteArrayData data[8];
-    char stringdata0[74];
+    QByteArrayData data[7];
+    char stringdata0[66];
 };
 #define QT_MOC_LITERAL(idx, ofs, len) \
     Q_STATIC_BYTE_ARRAY_DATA_HEADER_INITIALIZER_WITH_OFFSET(len, \
@@ -35,12 +35,11 @@ QT_MOC_LITERAL(2, 21, 0), // ""
 QT_MOC_LITERAL(3, 22, 22), // "QMediaRecorder::State*"
 QT_MOC_LITERAL(4, 45, 5), // "state"
 QT_MOC_LITERAL(5, 51, 6), // "newDig"
-QT_MOC_LITERAL(6, 58, 7), // "newEdit"
-QT_MOC_LITERAL(7, 66, 7) // "reStart"
+QT_MOC_LITERAL(6, 58, 7) // "reStart"
 
     },
     "MyClass\0processImage\0\0QMediaRecorder::State*\0"
-    "state\0newDig\0newEdit\0reStart"
+    "state\0newDig\0reStart"
 };
 #undef QT_MOC_LITERAL
 
@@ -50,7 +49,7 @@ static const uint qt_meta_data_MyClass[] = {
        7,       // revision
        0,       // classname
        0,    0, // classinfo
-       4,   14, // methods
+       3,   14, // methods
        0,    0, // properties
        0,    0, // enums/sets
        0,    0, // constructors
@@ -58,14 +57,12 @@ static const uint qt_meta_data_MyClass[] = {
        0,       // signalCount
 
  // slots: name, argc, parameters, tag, flags
-       1,    1,   34,    2, 0x0a /* Public */,
-       5,    0,   37,    2, 0x0a /* Public */,
-       6,    0,   38,    2, 0x0a /* Public */,
-       7,    0,   39,    2, 0x0a /* Public */,
+       1,    1,   29,    2, 0x0a /* Public */,
+       5,    0,   32,    2, 0x0a /* Public */,
+       6,    0,   33,    2, 0x0a /* Public */,
 
  // slots: parameters
     QMetaType::Void, 0x80000000 | 3,    4,
-    QMetaType::Void,
     QMetaType::Void,
     QMetaType::Void,
 
@@ -80,8 +77,7 @@ void MyClass::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, voi
         switch (_id) {
         case 0: _t->processImage((*reinterpret_cast< QMediaRecorder::State*(*)>(_a[1]))); break;
         case 1: _t->newDig(); break;
-        case 2: _t->newEdit(); break;
-        case 3: _t->reStart(); break;
+        case 2: _t->reStart(); break;
         default: ;
         }
     }
@@ -112,13 +108,13 @@ int MyClass::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
     if (_id < 0)
         return _id;
     if (_c == QMetaObject::InvokeMetaMethod) {
-        if (_id < 4)
+        if (_id < 3)
             qt_static_metacall(this, _c, _id, _a);
-        _id -= 4;
+        _id -= 3;
     } else if (_c == QMetaObject::RegisterMethodArgumentMetaType) {
-        if (_id < 4)
+        if (_id < 3)
             *reinterpret_cast<int*>(_a[0]) = -1;
-        _id -= 4;
+        _id -= 3;
     }
     return _id;
 }

@@ -8,11 +8,6 @@ using namespace cv;
 using namespace std;
 
 
-
-using namespace cv;
-using namespace std;
-
-
 MyClass::MyClass(QWidget *parent)
 	: QMainWindow(parent)
 {
@@ -21,8 +16,7 @@ MyClass::MyClass(QWidget *parent)
 	ui.setupUi(this);
 	vf = new QCameraViewfinder(ui.verticalLayoutWidget);
 	ui.verticalLayout->addWidget(vf);
-	//	this->resize(dw->geometry().width(), dw->geometry().height());
-
+	
 		/*
 		foreach(QCameraInfo info, QCameraInfo::availableCameras())
 		{
@@ -31,10 +25,6 @@ MyClass::MyClass(QWidget *parent)
 		cam->setViewfinder(vf);
 		vf->resize(dw->geometry().width(), dw->geometry().height());
 		ui.verticalLayoutWidget->resize(dw->geometry().width(), dw->geometry().height());
-	<<<<<<< HEAD
-
-	=======
-	>>>>>>> 2ea6785f2c38dcfd06dd77455405a2a9e79e8fa4
 		cam->setCaptureMode(QCamera::CaptureVideo);
 		cam->start();
 		*/
@@ -64,33 +54,17 @@ void MyClass::newDig() {
 			selectedFile.append(fileNames.at(nIndex).toLocal8Bit().constData());
 		}
 
-		/*QTextCodec *textCodec = QTextCodec::codecForName("eucKR");
+		//	cam->stop();
+		//capture >> frame;
 
-		QByteArray encodedString = textCodec->fromUnicode(selectedFile);
-
-
-		VideoCapture capture(encodedString.constData());
-		*/
-		//	VideoCapture capture("test0904.mp4");
-
-			//	cam->stop();
 		VideoCapture capture(selectedFile.toStdString());
 
 		VideoWriter outputVideo;
 		Mat frame;
-		//capture >> frame;
-
+	
 		Size *s = new Size((int)frame.cols, (int)frame.rows);
 
 		outputVideo.open("video.avi", 0, 30, *s, true);
-
-		/*if (!outputVideo.isOpened())
-		{
-			cout << "동영상을 저장하기 위한 초기화 작업 중 에러 발생" << endl;
-			return ;
-		}*/
-
-		//outputVideo.open("video.avi", -1,15, *s, true);
 
 		if (!outputVideo.isOpened())
 		{
@@ -114,9 +88,6 @@ void MyClass::newDig() {
 
 		int fps = 30;
 		//fps = capture.get(CV_CAP_PROP_FPS);
-		//backGround bg;
-
-
 
 
 		while (1)
@@ -163,11 +134,6 @@ void MyClass::newDig() {
 		edit->init(back, per, bg.AImg);
 		ui.editBtn->setEnabled(true);
 
-
-
-
-		///////////////////////////////////////////여기에  opencv 캠 
-
 	}
 	else
 	{
@@ -185,28 +151,8 @@ void MyClass::newDig() {
 
 
 }
-void MyClass::newEdit() {
-
-
-
-
-}
 void MyClass::reStart() {
 
 	ui.strBtn->setText("start");
 
 }
-
-void MyClass::processImage(QMediaRecorder::State *state)
-{
-
-
-
-
-	// sometime later, or on another press
-
-	//shotDig mDig = new shotDig();
-
-}
-
-
