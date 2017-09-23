@@ -154,11 +154,11 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\editdig.cpp" />
-    <ClCompile Include="..\..\src\face_change.cpp" />
+    <ClCompile Include="..\..\src\analyze_Emtoion.cpp" />
     <ClCompile Include="..\..\src\main.cpp" />
-    <ClCompile Include="..\..\src\backGround.cpp" />
+    <ClCompile Include="..\..\src\sub_Background.cpp" />
     <ClCompile Include="..\..\src\myclass.cpp" />
-    <ClCompile Include="..\..\src\Person.cpp" />
+    <ClCompile Include="..\..\src\PersonSet.cpp" />
     <ClCompile Include="GeneratedFiles\Debug\moc_editdig.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
@@ -243,9 +243,9 @@
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">.\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o ".\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp"  -DUNICODE -DWIN32 -DQT_DLL -DQT_NO_DEBUG -DNDEBUG -DQT_CORE_LIB -DQT_GUI_LIB -DQT_MULTIMEDIA_LIB -DQT_MULTIMEDIAWIDGETS_LIB -DQT_WIDGETS_LIB "-I.\GeneratedFiles" "-I." "-I$(QTDIR)\include" "-I.\GeneratedFiles\$(ConfigurationName)\." "-I$(QTDIR)\include\QtCore" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtMultimedia" "-I$(QTDIR)\include\QtMultimediaWidgets" "-I$(QTDIR)\include\QtWidgets" "-I.\..\..\src"</Command>
     </CustomBuild>
-    <ClInclude Include="..\..\src\backGround.h" />
-    <ClInclude Include="..\..\src\face_change.h" />
-    <ClInclude Include="..\..\src\Person.h" />
+    <ClInclude Include="..\..\src\sub_Background.h" />
+    <ClInclude Include="..\..\src\analyze_Emtoion.h" />
+    <ClInclude Include="..\..\src\PersonSet.h" />
     <ClInclude Include="GeneratedFiles\ui_editdig.h" />
     <ClInclude Include="GeneratedFiles\ui_myclass.h" />
   </ItemGroup>

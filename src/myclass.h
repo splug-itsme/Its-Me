@@ -19,7 +19,7 @@
 #include <qstring.h>
 #include "qtextcodec.h"
 #include <qfiledialog.h>
-#include "backGround.h"
+#include "sub_Background.h"
 
 
 class MyClass : public QMainWindow
@@ -31,7 +31,7 @@ public:
 	~MyClass();
 	
 	QCameraViewfinder * vf;
-	Person per;
+	PersonSet per;
 	cv::Mat back;
 
 	QCamera * cam;

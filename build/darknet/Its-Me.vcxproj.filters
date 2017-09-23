@@ -38,9 +38,6 @@
     <ClCompile Include="GeneratedFiles\qrc_myclass.cpp">
       <Filter>Generated Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Person.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\editdig.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -62,10 +59,13 @@
     <ClCompile Include="GeneratedFiles\Release\moc_myclass.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\backGround.cpp">
+    <ClCompile Include="..\..\src\sub_Background.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\face_change.cpp">
+    <ClCompile Include="..\..\src\PersonSet.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\analyze_Emtoion.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -93,13 +93,13 @@
     <ClInclude Include="GeneratedFiles\ui_editdig.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\Person.h">
+    <ClInclude Include="..\..\src\sub_Background.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\backGround.h">
+    <ClInclude Include="..\..\src\PersonSet.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\face_change.h">
+    <ClInclude Include="..\..\src\analyze_Emtoion.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -6,7 +6,7 @@
 #include <qlabel.h>
 #include <QTableWidget>
 #include <qdir.h>
-#include"Person.h"
+#include"PersonSet.h"
 #include"editdig.hpp"
 #include <QFileDialog>
 class editDig : public QWidget {
@@ -18,12 +18,12 @@ public:
 	~editDig();
 	QDesktopWidget *dw;
 	QImage img;
-	QImage background;
-	Person per;
+	QImage sub_Background;
+	PersonSet per;
 	std::vector<obj_t> group;
 	cv::Mat AImg, backG;
-	void init(cv::Mat bg, Person per, cv::Mat AImg);
-	cv::Mat editDig::add_object(cv::Mat &background, cv::Mat &object, cv::Point center);
+	void init(cv::Mat cut_bg, PersonSet per, cv::Mat big_bg);
+	cv::Mat editDig::add_object(cv::Mat &sub_Background, cv::Mat &object, cv::Point center);
 	int width, height;
 	QImage Mat2QImage(cv::Mat const& src);
 	public slots:

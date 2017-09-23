@@ -21,15 +21,15 @@ editDig::editDig(QWidget * parent) : QWidget(parent) {
 editDig::~editDig() {
 
 }
-void editDig::init(cv::Mat bg, Person per,cv::Mat AImg)
+void editDig::init(cv::Mat cut_bg, PersonSet per,cv::Mat big_bg)
 {
 	for (int i = 0; i < 32; i++)
 		click[i] = false;
 
-	backG = bg;
-	editDig::AImg = AImg;
-	background = Mat2QImage(bg);
-	ui.label->setPixmap(QPixmap::fromImage(background).scaled(ui.label->size()));
+	backG = cut_bg;
+	editDig::AImg = big_bg;
+	sub_Background = Mat2QImage(big_bg);
+	ui.label->setPixmap(QPixmap::fromImage(sub_Background).scaled(ui.label->size()));
 	QListWidgetItem *list;
 	editDig::per = per;
 	for (int k = 0; k < per.size(); k++) {
@@ -88,10 +88,10 @@ QImage  editDig::Mat2QImage(cv::Mat const& src)
 	return dest;
 }
 
-cv::Mat editDig::add_object(cv::Mat &background, cv::Mat &object, cv::Point center) {
+cv::Mat editDig::add_object(cv::Mat &sub_Background, cv::Mat &object, cv::Point center) {
 	// center is object's center location
 	cv::Mat src_mask = 255 * cv::Mat::ones(object.rows, object.cols, object.depth());
 	cv::Mat result;
-	seamlessClone(object, background, src_mask, center, result, cv::NORMAL_CLONE);
+	seamlessClone(object, sub_Background, src_mask, center, result, cv::NORMAL_CLONE);
 	return result;
 }

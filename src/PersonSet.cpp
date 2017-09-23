@@ -1,12 +1,12 @@
-#include "Person.h"
+#include "PersonSet.h"
 
 
 using namespace cv;
-Person::Person()
+PersonSet::PersonSet()
 {
 
 }
-Person::Person(cv::Mat &Img, std::vector <cv::Mat> &imgSet, std::vector<bbox_t> vec) // emotuon detect를 하여 group을 만드는 생성자
+PersonSet::PersonSet(cv::Mat &Img, std::vector <cv::Mat> &imgSet, std::vector<bbox_t> vec) // make group after detect emotion
 {
 	tmpObject.resize(vec.size());
 	for (int i = 0; i < imgSet.size(); i++) {
@@ -15,19 +15,19 @@ Person::Person(cv::Mat &Img, std::vector <cv::Mat> &imgSet, std::vector<bbox_t> 
 		}
 	}
 	cal_Emotion();
-	groupNum.resize(optObject.size());
-	groupPerson.resize(optObject.size());
+	groupNum.resize(object.size());
+	groupPerson.resize(object.size());
 
 	for (int i = 0; i < groupNum.size(); i++)
 		groupNum[i] = i;
 
-	make_Group(optObject);
+	make_Group(object);
 	make_Groupframe(Img);
 	// 여기에 최적의 object를 찾아서 넣도록 구현
 }
 
 
-Person::Person(cv::Mat &Img, std::vector<bbox_t> vec) // emotion detect를 하지않고 group을 만드는 생성자
+PersonSet::PersonSet(cv::Mat &Img, std::vector<bbox_t> vec) // make group without detecting emotion
 {
 	for (auto &i : vec) {
 		add_Person(Img, i);
@@ -43,13 +43,13 @@ Person::Person(cv::Mat &Img, std::vector<bbox_t> vec) // emotion detect를 하지않
 
 }
 
-Person::~Person()
+PersonSet::~PersonSet()
 {
 }
-int Person::size() { // group으로 나뉜 집단의 수를 반환
+int PersonSet::size() { // return group size
 	return groupPerson.size();
 }
-void Person::make_tmpObject(cv::Mat &Img, bbox_t vec, int imgNum, int objNum)
+void PersonSet::make_tmpObject(cv::Mat &Img, bbox_t vec, int imgNum, int objNum)
 {
 	obj_t tmp;
 	char filename[20];
@@ -68,33 +68,33 @@ void Person::make_tmpObject(cv::Mat &Img, bbox_t vec, int imgNum, int objNum)
 	tmp.vec = vec;
 	tmpObject[objNum].push_back(tmp);
 }
-void Person::cal_Emotion() {
+void PersonSet::cal_Emotion() { // detect emotion
 	for (int j = 0; j < tmpObject.size(); j++) { // 객체의 수
 		std::vector <char *> fnameVec(tmpObject[j].size());
 		std::vector <cv::Mat> fnameMat(tmpObject[j].size());
 
-		for (int i = 0; i < tmpObject[j].size(); i++) { // 이미지의 수
-#ifdef SAVE_TEST_FILES // test용 중간산출물 저장
+		for (int i = 0; i < tmpObject[j].size(); i++) { // repeat number of image
+#ifdef SAVE_TEST_FILES // test용 중간 산출물 저장
 			fnameVec[i] = new char[100];
 			sprintf(fnameVec[i], "file_%d_%d.jpg", i, j);
 			imwrite(fnameVec[i], tmpObject[j][i].frame);
 #endif
 			fnameMat[i] = tmpObject[j][i].frame;
 		}
-		face_change ff = face_change(fnameMat); // 감정이 가장 happy한 이미지 찾기
+		analyze_Emtoion ff = analyze_Emtoion(fnameMat); // return happiest image num
 		printf("faceNum : %d\n", ff.faceN);
-		if (ff.faceN == -1) // 얼굴감정을 못잡으면 첫번째 사진
-			optObject.push_back(tmpObject[j][0]);
+		if (ff.faceN == -1) // if cant detect face
+			object.push_back(tmpObject[j][0]);
 		else
-			optObject.push_back(tmpObject[j][ff.faceN]);
+			object.push_back(tmpObject[j][ff.faceN]);
 		
-		imwrite("emotion.bmp", optObject[j].frame);
+		imwrite("emotion.bmp", object[j].frame);
 		imwrite("original.bmp", tmpObject[j][0].frame);
 
 	}
 }
 
-void Person::add_Person(cv::Mat &Img, bbox_t vec) // Person의 object에 사람하나를 추가함.
+void PersonSet::add_Person(cv::Mat &Img, bbox_t vec) // make object (= push person
 {
 	obj_t tmp;
 	cv::Mat tmpImg;
@@ -112,19 +112,19 @@ void Person::add_Person(cv::Mat &Img, bbox_t vec) // Person의 object에 사람하나�
 	object.push_back(tmp);
 }
 
-obj_t Person::get_Person(int cnt) // object중 하나를 가져옴
+obj_t PersonSet::get_Person(int cnt) // get n.th person
 {
 	return object.at(cnt);
 }
-std::vector <obj_t> Person::get_Group(int cnt)
+std::vector <obj_t> PersonSet::get_Group(int cnt)
 {
 	return groupPerson.at(cnt);
 }
-Mat Person::get_Frame(int cnt) {
+Mat PersonSet::get_Frame(int cnt) {
 	return groupFrame.at(cnt);
 }
 
-void Person::make_Group(std::vector <obj_t> object)
+void PersonSet::make_Group(std::vector <obj_t> object) // make Group with object set
 {
 	for (int i = 0; i < object.size(); i++) {
 		for (int j = i + 1; j < object.size(); j++) {
@@ -145,7 +145,7 @@ void Person::make_Group(std::vector <obj_t> object)
 			i++;
 	}
 }
-bool Person::cover_Area(bbox_t vec1, bbox_t vec2) {
+bool PersonSet::cover_Area(bbox_t vec1, bbox_t vec2) { // Confirm adjacent 
 	Rect A(vec1.x, vec1.y, vec1.w - 1, vec1.h - 1);
 	Rect B(vec2.x, vec2.y, vec2.w - 1, vec2.h - 1);
 	Rect C = A & B;
@@ -153,7 +153,7 @@ bool Person::cover_Area(bbox_t vec1, bbox_t vec2) {
 		return false;
 	return true;
 }
-void Person::make_Groupframe(cv::Mat &firstFrame)
+void PersonSet::make_Groupframe(cv::Mat &firstFrame) // make groupImg to show
 {
 	for (int k = 0; k < groupPerson.size(); k++) {
 		int c;
@@ -173,7 +173,7 @@ void Person::make_Groupframe(cv::Mat &firstFrame)
 	}
 
 }
-void Person::draw_Rect(cv::Mat &dst, cv::Mat &src, bbox_t vec)
+void PersonSet::draw_Rect(cv::Mat &dst, cv::Mat &src, bbox_t vec)
 {
 	cv::Vec3b* dstData = (cv::Vec3b*)dst.data;
 	cv::Vec3b* srcData = (cv::Vec3b*)src.data;

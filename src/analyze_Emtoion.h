@@ -1,6 +1,6 @@
 //#pragma once
-#ifndef _FACE_CHANGE
-#define _FACE_CHANGE
+#ifndef _ANALYZE_EMOTION
+#define _ANALYZE_EMOTION
 
 #include <dlib/image_processing.h>
 #include <dlib/gui_widgets.h>
@@ -35,19 +35,18 @@ typedef normalized_function<probabilistic_funct_type> pfunct_type;
 
 
 
-class face_change {
+class analyze_Emtoion {
 public:
-	int faceN;
-	face_change::face_change();
-	face_change::face_change(std::vector<char *> filename);
-	face_change::face_change(std::vector<cv::Mat> face);
+	int faceN; // happiest image number
+	analyze_Emtoion::analyze_Emtoion();
+	analyze_Emtoion::analyze_Emtoion(std::vector<cv::Mat> face);
 	std::vector<sample_type> getAllAttributes(cv::Mat &face);
 
 	double length(point a, point b);
 	double slope(point a, point b);
-	void removePhotos();
-	std::vector<double> svmMulticlass(sample_type sample);
-	std::vector<double> probablityCalculator(std::vector<double> P);
+	void remove_Photos();
+	std::vector<double> svm_Multiclass(sample_type sample);
+	std::vector<double> cal_Probablity(std::vector<double> P);
 	int find_Num(std::vector<double> happySize);
 
 };

@@ -1,4 +1,4 @@
-#include "face_change.h"
+#include "analyze_Emtoion.h"
 
 string emotionFileName1 = "./data/neutral_vs_rest.dat";
 string emotionFileName2 = "./data/happy_vs_rest.dat";
@@ -13,12 +13,12 @@ pfunct_type ep4;
 int faceNumber = 0;
 frontal_face_detector face_detector = get_frontal_face_detector();
 
-face_change::face_change()
+analyze_Emtoion::analyze_Emtoion()
 {
 
 }
 
-face_change::face_change(std::vector<cv::Mat> face)
+analyze_Emtoion::analyze_Emtoion(std::vector<cv::Mat> face) // 감정분석
 {
 	std::vector <double> happySize;
 
@@ -31,7 +31,7 @@ face_change::face_change(std::vector<cv::Mat> face)
 
 
 	cout << "\n\nProgram Started\n\n";
-	for (int i = 0; i < face.size(); i++) {
+	for (int i = 0; i < face.size(); i++) { // face에는 감정분석 비교에 들어갈 사진들 = 같은 인물의 사진
 		int noOfFaces = 0;
 		faceNumber = 0;
 		std::vector<sample_type> samples;
@@ -43,8 +43,8 @@ face_change::face_change(std::vector<cv::Mat> face)
 			happySize.push_back(0);
 			continue;
 		}
-		prob = svmMulticlass(samples[0]);
-		prob = probablityCalculator(prob);
+		prob = svm_Multiclass(samples[0]);
+		prob = cal_Probablity(prob); // data를 가지고 각 감정의 가능성 분석
 		cout << "probablity that face " << " is Neutral  :" << prob[0] << endl;
 		cout << "probablity that face " << " is Happy    :" << prob[1] << endl;
 		cout << "probablity that face " << " is Sad      :" << prob[2] << endl;
@@ -59,7 +59,7 @@ face_change::face_change(std::vector<cv::Mat> face)
 }
 
 
-std::vector<sample_type> face_change::getAllAttributes(cv::Mat &face)
+std::vector<sample_type> analyze_Emtoion::getAllAttributes(cv::Mat &face) // 사진하나에 대해서 수행한다.
 {
 	int i, j, k;
 	std::vector<sample_type> samples;
@@ -67,12 +67,12 @@ std::vector<sample_type> face_change::getAllAttributes(cv::Mat &face)
 	stringstream s;
 
 	faceNumber = 1;
-	for (i = 0; i < faceNumber; i++)
+	for (i = 0; i < faceNumber; i++) 
 	{
 		array2d<rgb_pixel> img;
 		dlib::assign_image(img, dlib::cv_image<bgr_pixel>(face)); // Mat 형식 array<rgb_pixel>로 포맷 변환
 
-		pyramid_up(img);
+		pyramid_up(img); // 사진 확대
 
 		std::vector<dlib::rectangle> faceRectangles = face_detector(img);
 		if (faceRectangles.size() == 0)
@@ -94,7 +94,7 @@ std::vector<sample_type> face_change::getAllAttributes(cv::Mat &face)
 	return samples;
 }
 
-double face_change::length(point a, point b)
+double analyze_Emtoion::length(point a, point b)
 {
 	int x1, y1, x2, y2;
 	double dist;
@@ -108,7 +108,7 @@ double face_change::length(point a, point b)
 	return dist;
 }
 
-double face_change::slope(point a, point b)
+double analyze_Emtoion::slope(point a, point b)
 {
 	int x1, y1, x2, y2;
 
@@ -125,7 +125,7 @@ double face_change::slope(point a, point b)
 		return atan(double(y1 - y2)) / (x1 - x2);
 }
 
-void face_change::removePhotos()
+void analyze_Emtoion::remove_Photos()
 {
 	int i;
 	stringstream s;
@@ -139,7 +139,7 @@ void face_change::removePhotos()
 }
 
 
-std::vector<double> face_change::svmMulticlass(sample_type sample)
+std::vector<double> analyze_Emtoion::svm_Multiclass(sample_type sample)
 {
 	std::vector<double> probs;
 	probs.push_back(ep1(sample));
@@ -150,7 +150,7 @@ std::vector<double> face_change::svmMulticlass(sample_type sample)
 	return probs;
 }
 
-std::vector<double> face_change::probablityCalculator(std::vector<double> P)
+std::vector<double> analyze_Emtoion::cal_Probablity(std::vector<double> P)
 {
 	std::vector<double> EmoProb(4);
 	double sum = P[0] + P[1] + P[2] + P[3];
@@ -161,7 +161,7 @@ std::vector<double> face_change::probablityCalculator(std::vector<double> P)
 	return EmoProb;
 }
 
-int face_change::find_Num(std::vector<double> happySize)
+int analyze_Emtoion::find_Num(std::vector<double> happySize)
 {
 	if (happySize.size() == 0) // 못찾을 경우
 		return -1;

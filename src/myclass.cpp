@@ -121,14 +121,14 @@ void MyClass::newDig() {
 		msgbox.setText("aaaaaaaaaaaaaaaaaaaaaaaaaaa");
 		msgbox.setWindowTitle("making...");
 		msgbox.show();
-		backGround bg = backGround("video.avi");
+		sub_Background bg = sub_Background("video.avi");
 		back = bg.bg;
-		per = bg.person;
+		per = bg.person_set;
 		msgbox.setWindowTitle("complete");
-		msgbox.setText("complete making backGround.!!");
+		msgbox.setText("complete making Background.!!");
 		msgbox.exec();
 		editDig *edit = new editDig();
-		edit->init(back, per, bg.AImg);
+		edit->init(back, per, bg.big_backImg);
 		ui.editBtn->setEnabled(true);
 
 	}
