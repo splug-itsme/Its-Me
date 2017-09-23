@@ -16,7 +16,14 @@
  * 정의된 RECURSIVE_COUNT 값만큼 감정분석에 들어갈 사람이미지의 수를 정한다.
  * SAVE_TEST_FILES 전처리기 설정 시 감정분석에 들어가는 사람이미지를 .jpg 형태로 저장하여 중간 산출물을 볼 수 있다.
  * DETECT_EMOTION 설정 시 배경 연산 후 감정분석을 하고 해제 시 감정분석 없이 배경 연산 후 3번과정이 띄워진다.
+## 데모
+![Sampleinput](Samples/sampleinput.gif)
 
+Input Video
+
+![Output](Samples/sampleoutput.bmp)
+
+Output Image
 ## 설치환경
 본 모듈은 GUI 형태의 모듈로서 Window 환경에서 사용가능합니다.
 
