@@ -39,7 +39,6 @@ public:
 private:
 	Ui::MyClassClass ui;
 	public slots:
-	void processImage(QMediaRecorder::State *state);
 	void newDig();
 	void reStart();
 };

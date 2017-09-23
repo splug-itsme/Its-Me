@@ -17,14 +17,14 @@ MyClass::MyClass(QWidget *parent)
 	vf = new QCameraViewfinder(ui.verticalLayoutWidget);
 	ui.verticalLayout->addWidget(vf);
 	
-		/*
+		/* 웹캡을 사용해서 프로젝트를 실행할때 들어가는 코드 
 		foreach(QCameraInfo info, QCameraInfo::availableCameras())
 		{
-			cam = new QCamera(info);
+			cam = new QCamera(info);//웹캡의 설정을 가져온다
 		}
 		cam->setViewfinder(vf);
 		vf->resize(dw->geometry().width(), dw->geometry().height());
-		ui.verticalLayoutWidget->resize(dw->geometry().width(), dw->geometry().height());
+		ui.verticalLayoutWidget->resize(dw->geometry().width(), dw->geometry().height());//위젯의 크기를 카메라 영상 크기로 설정해준다.
 		cam->setCaptureMode(QCamera::CaptureVideo);
 		cam->start();
 		*/
@@ -37,13 +37,13 @@ MyClass::~MyClass()
 }
 
 void MyClass::newDig() {
+	//첫번째 버튼을 눌럿을때 이 부분이 실행된다.
 
-
-	if (ui.strBtn->text() == "start")
+	if (ui.strBtn->text() == "start")//버튼의 상태가 start 일 경우 
 	{
-		ui.strBtn->setText("save");
+		ui.strBtn->setText("save");//버튼의 상태를 save로  설정해준다
 
-		QFileDialog fileDialog(this, tr("Open File"), tr("C:"), tr("movie (*.mp4 *.avi )"));
+		QFileDialog fileDialog(this, tr("Open File"), tr("C:"), tr("movie (*.mp4 *.avi )"));//동영상 파일 선택 다이얼로그 생성 
 		QStringList fileNames;
 		if (fileDialog.exec()) {
 			fileNames = fileDialog.selectedFiles();
@@ -53,12 +53,11 @@ void MyClass::newDig() {
 		for (int nIndex = 0; nIndex < fileNames.size(); nIndex++) {
 			selectedFile.append(fileNames.at(nIndex).toLocal8Bit().constData());
 		}
-
-		//	cam->stop();
-		//capture >> frame;
-
-		VideoCapture capture(selectedFile.toStdString());
-
+		/*웹캠 사용사 코드
+			cam->stop();
+		capture >> frame;
+		*/
+		VideoCapture capture(selectedFile.toStdString());//선택된 동영상의 프레임을 가져온다
 		VideoWriter outputVideo;
 		Mat frame;
 	
@@ -66,12 +65,12 @@ void MyClass::newDig() {
 
 		outputVideo.open("video.avi", 0, 30, *s, true);
 
-		if (!outputVideo.isOpened())
+	/*	if (!outputVideo.isOpened())
 		{
 			cout << "동영상을 저장하기 위한 초기화 작업 중 에러 발생" << endl;
 			return;
 		}
-
+*/
 
 		if (!capture.isOpened())
 		{
@@ -87,8 +86,6 @@ void MyClass::newDig() {
 		int i = 0;
 
 		int fps = 30;
-		//fps = capture.get(CV_CAP_PROP_FPS);
-
 
 		while (1)
 		{
@@ -96,8 +93,8 @@ void MyClass::newDig() {
 
 
 			i++;
-			if (!capture.read(frame))
-				break;
+			if (!capture.read(frame))//읽어올 프레임이 없다면 
+				break;//멈춤
 
 			outputVideo << frame;
 
