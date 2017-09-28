@@ -1,17 +1,17 @@
-#include "sub_Background.h"
+ï»¿#include "sub_Background.h"
 
 Detector detector("./data/yolo.cfg", "./data/yolo.weights");
-float cutRate = 0.95; // Àß¶ó³¾ Å×µÎ¸® ºñÀ²
+float cutRate = 0.95; // Percentage to cut to Alpha Blending
 
 
- /* ¹è°æÀ» ±¸ÇÏ±â À§ÇØ¼­ ¿µ»óÀ» ÀÐ¾î¿Í yolo ½ÇÇà ¹× ¹è°æ ¿¬»ê ¼öÇà */
+/* Execute yolo and perform operations using image to make background  */
 sub_Background::sub_Background(char *videoFile)
 {
 	cv::Mat des = cal_Background(videoFile);
 	capture_ROI(des, videoFile, "AA.mp4");
 	add_ObjectToRes(des, videoFile);
 }
-// res Mat¿¡ Èò»öÀ¸·Î »ç¶÷À» Ã¤¿î´Ù. Áï ¸¶½ºÅ·ÇÏ±â
+// White fills a person's area. That is, masking
 void sub_Background::make_Mask(cv::Mat &res, std::vector<bbox_t> const result_vec)
 {
 	cv::Vec3b* resMat = (cv::Vec3b*)res.data;
@@ -28,6 +28,7 @@ void sub_Background::make_Mask(cv::Mat &res, bbox_t const result_vec)
 	cv::Rect rect(pt, cv::Size(result_vec.w, result_vec.h));
 	cv::rectangle(res, rect, cv::Scalar(255, 255, 255), cv::FILLED);
 }
+// save ROI area
 void sub_Background::save_ROI(cv::Mat &Img, const std::vector <bbox_t> vec)
 {
 	for (auto &i : vec) {
@@ -35,7 +36,7 @@ void sub_Background::save_ROI(cv::Mat &Img, const std::vector <bbox_t> vec)
 		cv::rectangle(Img, pt, cv::Point(i.x + i.w, i.y + i.h), cv::Scalar(0, 0, 255), 3);
 	}
 }
-// ¹è°æ¿¡ °´Ã¼¸¦ centerÁÂÇ¥¸¦ Áß½ÉÀ¸·Î ºÙ¿©³Ö´Â´Ù.
+// Pastes objects in the background centered on the center coordinates.
 cv::Mat sub_Background::add_object(cv::Mat &sub_Background, cv::Mat &object, cv::Point center) {
 	// center is object's center location
 	cv::Mat src_mask = 255 * cv::Mat::ones(object.rows, object.cols, object.depth());
@@ -43,18 +44,17 @@ cv::Mat sub_Background::add_object(cv::Mat &sub_Background, cv::Mat &object, cv:
 	seamlessClone(object, sub_Background, src_mask, center, result, cv::NORMAL_CLONE);
 	return result;
 }
-// ¹è°æ±¸ÇÏ±â
+// Getting the background.
 cv::Mat sub_Background::cal_Background(char *videoFile)
 {
-	cv::VideoCapture bgrCapture(videoFile);  // ¿µ»ó ÆÄÀÏ ÀÐ±â
-#ifdef SAVE_ROI_VIDEO
+	cv::VideoCapture bgrCapture(videoFile);  // read video file
+#ifdef SAVE_ROI_VIDEO // if you want save ROI video 
 	cv::VideoWriter vw;
 	vw = cv::VideoWriter("ROIvideo.mp4", CV_FOURCC('D', 'I', 'V', 'X'), 5, cv::Size((int)bgrCapture.get(CV_CAP_PROP_FRAME_WIDTH), (int)bgrCapture.get(CV_CAP_PROP_FRAME_HEIGHT)), true);
 #endif
 
 	std::vector<cv::Mat> src;
 	cv::Mat des;
-
 
 	if (!bgrCapture.isOpened()) {
 		//error in opening the video input
@@ -64,9 +64,9 @@ cv::Mat sub_Background::cal_Background(char *videoFile)
 
 
 	cv::Mat Img;
-	bgrCapture.read(Img); // Ã¹ÇÁ·¹ÀÓÀ» Img¿¡ ÀúÀå
-	cv::Mat readImg = cv::Mat(Img.rows, Img.cols, CV_32SC3, cv::Scalar(0, 0, 0)); //  ÀÐÀº ÀÌ¹ÌÁö¸¦ ÀúÀåÇÒ Mat
-	des = cv::Mat(Img.rows, Img.cols, CV_8UC3, cv::Scalar(0, 0, 0)); // °á°ú¸¦ ÀúÀåÇÒ Mat
+	bgrCapture.read(Img); // Save the first frame to Img
+	cv::Mat readImg = cv::Mat(Img.rows, Img.cols, CV_32SC3, cv::Scalar(0, 0, 0)); //  Mat to save the read image
+	des = cv::Mat(Img.rows, Img.cols, CV_8UC3, cv::Scalar(0, 0, 0)); // Mat to save results
 
 	int check = 0;
 	std::vector <cv::Mat> frame;
@@ -77,8 +77,8 @@ cv::Mat sub_Background::cal_Background(char *videoFile)
 		if (check % 4 != 0)
 			continue;
 		std::vector<bbox_t> result_vec = detector.detect(readImg);
-		cv::Mat diff = cv::Mat(Img.rows, Img.cols, CV_8UC3, cv::Scalar(0, 0, 0)); // °´Ã¼¸¦ Èò»öÀ¸·Î Ã¤¿îÈÄ ÀúÀåÇÒ Mat
-		cv::Mat result = cv::Mat(Img.rows, Img.cols, CV_32SC3, cv::Scalar(0, 0, 0)); // °´Ã¼¸¦ Á¦¿ÜÇÑ »çÁøÀ» °¡Á®¿Í ÀúÀå
+		cv::Mat diff = cv::Mat(Img.rows, Img.cols, CV_8UC3, cv::Scalar(0, 0, 0)); // Mat to fill the object with white,
+		cv::Mat result = cv::Mat(Img.rows, Img.cols, CV_32SC3, cv::Scalar(0, 0, 0)); // Mat to save photos except objects
 #ifdef SAVE_ROI_VIDEO
 		cv::Mat tmp = readImg.clone();
 #endif
@@ -93,18 +93,17 @@ cv::Mat sub_Background::cal_Background(char *videoFile)
 		vw.write(tmp);
 #endif
 
-		make_Mask(diff, result_vec); // diff¿¡ °´Ã¼¸¦ Èò»öÀ¸·Î Ã¤¿ö³Ö´Â´Ù.
-		copy_MaskToImg(readImg, result, diff); // ¹°Ã¼ ¿µ¿ªÀÇ ¹ÝÀüÀ» ºÙ¿©³Ö´Â´Ù.
+		make_Mask(diff, result_vec); // Fill objects with white in diff.
+		copy_MaskToImg(readImg, result, diff); // Pastes the inverse of the object area.
 		
-		frame.push_back(result); // frame vector¿¡ result¸¦ ¸ðÀº´Ù.
-								 //if (cvWaitKey() == 27) continue; // break¿¡¼­ ¹Ù²Þ Å°ÀÔ·Â¹ÞÀ»¶§¸¶´Ù ÇÁ·¹ÀÓÀÌµ¿
+		frame.push_back(result);
 
 	}
 #ifdef SAVE_ROI_VIDEO
 	vw.release();
 #endif
 
-	int size = frame[0].rows / 4; // thread »ý¼º ¿¬»ê½Ã°£À» ÁÙÀÌ±âÀ§ÇØ ºÐ»êÀ¸·Î ¿¬»ê
+	int size = frame[0].rows / 4; // create Thread, Compute to variance to reduce computation time
 	thread t1(&cal_Degree, des, frame, 0, size);
 	thread t2(&cal_Degree, des, frame, size, size * 2);
 	thread t3(&cal_Degree, des, frame, size * 2, size * 3);
@@ -114,7 +113,7 @@ cv::Mat sub_Background::cal_Background(char *videoFile)
 	t3.join();
 	t4.join();
 
-	check_Mat(des); // ¹è°æ¿¡ 300À¸·Î Ã¤¿öÁø ¼ö¸¦ °è»ê Áï ¹è°æÀ» ¸ø ±¸ÇÑºÎºÐ
+	check_Mat(des); // Calculate the number filled in the background to 300. That is can;t get background area
 
 	bgrCapture.release();
 	imwrite("bground.bmp", des);
@@ -122,9 +121,9 @@ cv::Mat sub_Background::cal_Background(char *videoFile)
 	big_backImg = des(cv::Rect(des.cols * (1 - cutRate) / 2, des.rows * (1 - cutRate) / 2, des.cols * cutRate, des.rows * cutRate));
 	return des;
 }
-// ¹è°æ¿¡ »ç¶÷À» ±×·Á³Ö´Â´Ù. des´Â ¹è°æÀ» ÀúÀå, 
+// Draw a person in the background. des = background Img
 void sub_Background::add_ObjectToRes(cv::Mat &des, char *filename) {
-	cv::VideoCapture Capture("AA.mp4");  // ¿µ»ó ÆÄÀÏ ÀÐ±â
+	cv::VideoCapture Capture("AA.mp4"); 
 	cv::Mat first_Img, back_Img;
 
 	if (!Capture.isOpened()) {
@@ -132,18 +131,18 @@ void sub_Background::add_ObjectToRes(cv::Mat &des, char *filename) {
 		cerr << "Unable to open video file: " << filename << endl;
 		exit(EXIT_FAILURE);
 	}
-	cv::VideoCapture bgrCapture(filename);  // ¿µ»ó ÆÄÀÏ ÀÐ±â
+	cv::VideoCapture bgrCapture(filename);  
 	if (!bgrCapture.isOpened()) {
 		//error in opening the video input
 		cerr << "Unable to open video file: " << filename << endl;
 		exit(EXIT_FAILURE);
 	}
-	Capture.read(back_Img); // Å×µÎ¸®°¡ ¹è°æÀ¸·Î Ã¤¿öÁø ¿µ»ó¿¡¼­ ÀÐ¾î¼­ ÀúÀå
-	bgrCapture.read(first_Img); // ¿øº» ¿µ»ó¿¡¼­ Ã¹ÇÁ·¹ÀÓÀ» Img¿¡ ÀúÀåS
+	Capture.read(back_Img);
+	bgrCapture.read(first_Img); // Save the first frame from the original image to Img
 
-	std::vector<bbox_t> first_vec = detector.detect(first_Img); // Ã¹ÇÁ·¹ÀÓÀÇ »ç¶÷ À§Ä¡ ÀúÀå
+	std::vector<bbox_t> first_vec = detector.detect(first_Img); // Save the first frame's person location
 #ifdef DETECT_EMOTION
-	std::vector <cv::Mat> emotion_ImgSet; // °¨Á¤¿¬»êÀ» À§ÇÑ ÀÌ¹ÌÁö º¤ÅÍ
+	std::vector <cv::Mat> emotion_ImgSet; // Image vector for emotion computation
 
 	emotion_ImgSet.push_back(first_Img);
 	for (int i = 0; i < RECURSIVE_COUNT; i++) { //  RECURSIVE_COUNT  = 30
@@ -157,36 +156,36 @@ void sub_Background::add_ObjectToRes(cv::Mat &des, char *filename) {
 #endif
 
 	des = des(cv::Rect(des.cols * (1 - cutRate) / 2, des.rows * (1 - cutRate) / 2, des.cols * cutRate, des.rows * cutRate));
-	imwrite("sub_Background.bmp", des); // ÀÚ¸¥ ÈÄ °á°ú ÀÌ¹ÌÁö ÀúÀå
+	imwrite("sub_Background.bmp", des);
 
 	Capture.release();
 	bgrCapture.release();
 
 }
-// ÀÏÄ¡µµ Á¤µµ¸¦ ¿¬»êÇÑ´Ù. des´Â °á°ú¸¦ ÀúÀå, frame¿¡´Â °è»êÀ» À§ÇÑ ÀÌ¹ÌÁö vector, start¿Í end´Â ÀÏÄ¡µµ¸¦  °è»êÇÒ ÀÌ¹ÌÁöÀÇ ±¸°£ ¿©±â¼­´Â 0¿¡¼­ ÃÖ´ë¸¦ ´ÜÀÏ±¸°£À¸·Î Àâ´Â´Ù. 
+// calculates the degree of matching save result Img to des, frame is Imgvector to calculate, start and end are interval of the image to be calculated.
 void sub_Background::cal_Degree(cv::Mat &des, std::vector <cv::Mat> &frame, int start, int end)
-{  // ´ÜÀÏ ±¸°£ÀÇ ÇÁ·¹ÀÓµé , des´Â ±¸°£ÀÇ ´ëÇ¥°ª
+{  // Single - section frames, 
 
 
 	printf("%d %d %d\n", frame.size(), start, end);
-	std::vector <cv::Mat> tmp; // ¿¬»êÀ» À§ÇÑ ÀÓ½Ã Mat vector
+	std::vector <cv::Mat> tmp; // Temporary Mat vector for computation
 	tmp.resize(frame.size());
 
 	for (int i = 0; i < frame.size(); i++)
 		frame[i].convertTo(tmp[i], CV_8UC3);
 
-	cv::Vec3b* desMat = (cv::Vec3b*)des.data; // 3Ã¤³Î byteÅ©±âÀÇ VecÅ¬·¡½º typeÀ¸·Î ÀÌ¹ÌÁöÀÇ data ¸â¹ö¸¦ °¡¸®Å´
+	cv::Vec3b* desMat = (cv::Vec3b*)des.data; // Point to 3 - channel byte size Vec class type Img' data member 
 	for (int i = start; i < end; i++) {
 		for (int j = 0; j < frame[0].cols; j++) {
 			std::vector <int> agrDegree(frame.size(), 0);
 			for (int k = 0; k < frame.size(); k++) {
 				for (int t = k + 1; t < frame.size(); t++) {
-					cv::Vec3i* data = (cv::Vec3i*)frame[k].data; // 255ÀÌ»óÀÇ(= byte´ÜÀ§) °ªÀ» ºñ±³ÇÏ±â À§ÇØ integer typeÀ¸·Î Vec»ý¼º
+					cv::Vec3i* data = (cv::Vec3i*)frame[k].data; // Generate Vec as an integer type To compare values greater than 255(byte)
 					cv::Vec3i* data2 = (cv::Vec3i*)frame[t].data;
 					if (data[i * frame[0].cols + j] == cv::Vec3i(300, 300, 300)) {
 						continue;
 					}
-					else if (abs(data[i * frame[0].cols + j][0] - data2[i * frame[0].cols + j][0]) < 10 && abs(data[i * frame[0].cols + j][1] - data2[i * frame[0].cols + j][1]) < 10 && abs(data[i * frame[0].cols + j][2] - data2[i * frame[0].cols + j][2]) < 10) { // DEGREEº¸´Ù ÀÛÀ¸¸é Áõ°¡
+					else if (abs(data[i * frame[0].cols + j][0] - data2[i * frame[0].cols + j][0]) < 10 && abs(data[i * frame[0].cols + j][1] - data2[i * frame[0].cols + j][1]) < 10 && abs(data[i * frame[0].cols + j][2] - data2[i * frame[0].cols + j][2]) < 10) { //  smaller than degree then increase.
 						agrDegree[k]++;
 						agrDegree[t]++;
 					}
@@ -198,7 +197,7 @@ void sub_Background::cal_Degree(cv::Mat &des, std::vector <cv::Mat> &frame, int 
 		}
 	}
 }
-// 300À¸·Î Ã¤¿öÁø °ªÀÌ ÀÌ¹ÌÁö¿¡ ¾ó¸¶³ª ÀÖ´ÂÁö °è»ê
+// Calculate how many values are filled in the image with 300
 void sub_Background::check_Mat(cv::Mat &mat)
 {
 	cv::Vec3b* matData = (cv::Vec3b*)mat.data;
@@ -213,55 +212,55 @@ void sub_Background::check_Mat(cv::Mat &mat)
 	}
 	printf("300 data counts : %d\n", k);
 }
-// ÀÏÄ¡µµ ÃÖ´ë°ªÀ» °¡Áø ÇÁ·¹ÀÓ ¹øÈ£ ¹ÝÈ¯
+// Returns the frame number with the maximum match value
 int sub_Background::return_Max(std::vector <int> &agrDegree)
 {
-	int ret = *max_element(agrDegree.begin(), agrDegree.end()); // ÀÏÄ¡µµ ÃÖ´ë ±¸ÇÏ±â
+	int ret = *max_element(agrDegree.begin(), agrDegree.end()); 
 
-	for (int i = 0; i < agrDegree.size(); i++) { // ÀÌÁø°Ë»öÇÏ¸é ½Ã°£Á» ÁÙÀÏ¼ö ÀÕÀ½
+	for (int i = 0; i < agrDegree.size(); i++) {
 		if (agrDegree[i] == ret)
 			return i;
 	}
 	return 0;
 }
 
-// Ã¤³Î 3°³ÀÇ ÀÌ¹ÌÁö¸¦ ÀÌÁøÈ­ ½ÃÅ²´Ù.
+// Binarize the  3 - channel Img.
 void sub_Background::change_ColorToGray(cv::Mat &Img)
 {
 	cv::Vec3b* data = (cv::Vec3b*)Img.data;
 	for (int i = 0; i < Img.rows; i++) {
 		for (int j = 0; j < Img.cols; j++) {
-			if (data[i * Img.cols + j][0] == 255 || data[i * Img.cols + j][1] == 255 || data[i * Img.cols + j][2] == 255)  // »¡°£»ö ¸ÂÀ¸¸é
+			if (data[i * Img.cols + j][0] == 255 || data[i * Img.cols + j][1] == 255 || data[i * Img.cols + j][2] == 255) 
 			{
-				data[i * Img.cols + j] = cv::Vec3b(255, 255, 255); // Èò»öÀ¸·Î ¹Ù²ãÁÖ±â
+				data[i * Img.cols + j] = cv::Vec3b(255, 255, 255); // change to white
 			}
 		}
 	}
 }
-//copyTo º¯Çü maskÀ§Ä¡¸¦ Img¿¡¼­ °¡Á®¿Í result¿¡ ºÙÀÎ´Ù. ±×¸®°í maskÀÇ °ËÀº ºÎºÐÀº 300À¸·Î Ã¤¿î´Ù.
-void sub_Background::copy_MaskToImg(cv::Mat &Img, cv::Mat &result, cv::Mat &mask) // copyTo ±¸Çö
+//Take the mask position from Img and attach it to result. and the black part of the mask is filled with 300(Values â€‹â€‹greater than 255)
+void sub_Background::copy_MaskToImg(cv::Mat &Img, cv::Mat &result, cv::Mat &mask) // copyTo êµ¬í˜„
 {
 	Img.convertTo(Img, CV_32SC3);
 	cv::Vec3b* maskData = (cv::Vec3b*)mask.data; 
-	cv::Vec3i* ImgData = (cv::Vec3i*)Img.data; // mask ºÎºÐÀº 255ÀÌ»óÀÇ °ªÀ» Ã¤¿ö³Öµµ·Ï ÇÏ±âÀ§ÇØ integer typeÀ¸·Î »ý¼ºÇÑ´Ù.
+	cv::Vec3i* ImgData = (cv::Vec3i*)Img.data; // generate Vec as an integer type To compare values greater than 255(byte)
 	cv::Vec3i* resData = (cv::Vec3i*)result.data;
 
 	for (int i = 0; i < mask.rows; i++) {
 		for (int j = 0; j < mask.cols; j++) {
-			if (maskData[i * mask.cols + j] != cv::Vec3b(255, 255, 255)) { // Èò»öÀÌ¶ó¸é! ºÙÀÌ±â
+			if (maskData[i * mask.cols + j] != cv::Vec3b(255, 255, 255)) { // if white then paste
 				resData[i * mask.cols + j] = ImgData[i * mask.cols + j];
 			}
-			else { // °ËÀº»ö ºÎºÐÀº 300À¸·Î Ã¤¿ì±â
+			else { // ê²€ì€ìƒ‰ ë¶€ë¶„ì€ 300ìœ¼ë¡œ ì±„ìš°ê¸°
 				resData[i * mask.cols + j] = cv::Vec3i(300, 300, 300);
 			}
 		}
 	}
 }
-/* ¿µ»óÀÇ Å×µÎ¸®¸¦ Àß¶ó¼­ ¹è°æÀ¸·Î Ã¤¿î µÚ savefile¿¡ ÀúÀå
-des´Â ¹è°æÀÌ¹ÌÁö, videofileÀº ¿øº»¿µ»ó savefileÀº Å×µÎ¸®¸¦ ÀÚ¸¥µÚ ÀúÀåµÉ ÆÄÀÏ ÀÌ¸§ */
+/* Cut the border of the image and fill it with background and save it in savefile
+des is backGroun Img, videofile is original videofile,  savefile Is the name of the file to be saved after cutting the border */
 void sub_Background::capture_ROI(cv::Mat &des, char *videoFile, char *saveFile)
 {
-	cv::VideoCapture capture(videoFile);  // ¿µ»ó ÆÄÀÏ ÀÐ±â
+	cv::VideoCapture capture(videoFile); 
 	cv::VideoWriter vw;
 
 	vw = cv::VideoWriter(saveFile, CV_FOURCC('D', 'I', 'V', 'X'), capture.get(CV_CAP_PROP_FPS), cv::Size((int)capture.get(CV_CAP_PROP_FRAME_WIDTH), (int)capture.get(CV_CAP_PROP_FRAME_HEIGHT)), true);
@@ -285,7 +284,7 @@ void sub_Background::capture_ROI(cv::Mat &des, char *videoFile, char *saveFile)
 	}
 	if (!vw.isOpened())
 	{
-		cout << "µ¿¿µ»óÀ» ÀúÀåÇÏ±â À§ÇÑ ÃÊ±âÈ­ ÀÛ¾÷ Áß ¿¡·¯ ¹ß»ý" << endl;
+		cout << "ë™ì˜ìƒì„ ì €ìž¥í•˜ê¸° ìœ„í•œ ì´ˆê¸°í™” ìž‘ì—… ì¤‘ ì—ëŸ¬ ë°œìƒ" << endl;
 		exit(1);
 	}
 	while (capture.read(Img)) {

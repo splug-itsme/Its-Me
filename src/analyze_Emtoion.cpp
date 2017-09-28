@@ -18,7 +18,7 @@ analyze_Emtoion::analyze_Emtoion()
 
 }
 
-analyze_Emtoion::analyze_Emtoion(std::vector<cv::Mat> face) // 감정분석
+analyze_Emtoion::analyze_Emtoion(std::vector<cv::Mat> face) // Analyze emotions about people and return optimal emotion photo number
 {
 	std::vector <double> happySize;
 
@@ -31,7 +31,7 @@ analyze_Emtoion::analyze_Emtoion(std::vector<cv::Mat> face) // 감정분석
 
 
 	cout << "\n\nProgram Started\n\n";
-	for (int i = 0; i < face.size(); i++) { // face에는 감정분석 비교에 들어갈 사진들 = 같은 인물의 사진
+	for (int i = 0; i < face.size(); i++) { // photographs of the emotional analysis comparison = photographs of the same person
 		int noOfFaces = 0;
 		faceNumber = 0;
 		std::vector<sample_type> samples;
@@ -39,12 +39,12 @@ analyze_Emtoion::analyze_Emtoion(std::vector<cv::Mat> face) // 감정분석
 		samples = getAllAttributes(face[i]);
 
 		std::vector<double> prob;
-		if (samples.size() == 0) { // 얼굴 못잡으면 넘어감
+		if (samples.size() == 0) { // if can't catch face
 			happySize.push_back(0);
 			continue;
 		}
 		prob = svm_Multiclass(samples[0]);
-		prob = cal_Probablity(prob); // data를 가지고 각 감정의 가능성 분석
+		prob = cal_Probablity(prob); // Analyzing the possibility of each emotion with data
 		cout << "probablity that face " << " is Neutral  :" << prob[0] << endl;
 		cout << "probablity that face " << " is Happy    :" << prob[1] << endl;
 		cout << "probablity that face " << " is Sad      :" << prob[2] << endl;
@@ -59,7 +59,7 @@ analyze_Emtoion::analyze_Emtoion(std::vector<cv::Mat> face) // 감정분석
 }
 
 
-std::vector<sample_type> analyze_Emtoion::getAllAttributes(cv::Mat &face) // 사진하나에 대해서 수행한다.
+std::vector<sample_type> analyze_Emtoion::getAllAttributes(cv::Mat &face) // This is done for one photo and get information of the face.
 {
 	int i, j, k;
 	std::vector<sample_type> samples;
@@ -70,14 +70,13 @@ std::vector<sample_type> analyze_Emtoion::getAllAttributes(cv::Mat &face) // 사�
 	for (i = 0; i < faceNumber; i++) 
 	{
 		array2d<rgb_pixel> img;
-		dlib::assign_image(img, dlib::cv_image<bgr_pixel>(face)); // Mat 형식 array<rgb_pixel>로 포맷 변환
+		dlib::assign_image(img, dlib::cv_image<bgr_pixel>(face)); // convert Mat To array<rgb_pixel>
 
-		pyramid_up(img); // 사진 확대
+		pyramid_up(img); // Enlarge photo to catch face  easy
 
 		std::vector<dlib::rectangle> faceRectangles = face_detector(img);
-		if (faceRectangles.size() == 0)
+		if (faceRectangles.size() == 0) // If can't catch the face 
 			continue;
-		// 여기서 얼굴 사각형을 못잡으면 나가도록 구현
 		full_object_detection feature = sp(img, faceRectangles[0]);
 		int l = 0;
 		for (int j = 0; j < 68; j++)
@@ -163,7 +162,7 @@ std::vector<double> analyze_Emtoion::cal_Probablity(std::vector<double> P)
 
 int analyze_Emtoion::find_Num(std::vector<double> happySize)
 {
-	if (happySize.size() == 0) // 못찾을 경우
+	if (happySize.size() == 0) // If not found
 		return -1;
 	double maxX = *max_element(happySize.begin(), happySize.end());
 	if (maxX < 0.01)

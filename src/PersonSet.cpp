@@ -23,7 +23,7 @@ PersonSet::PersonSet(cv::Mat &Img, std::vector <cv::Mat> &imgSet, std::vector<bb
 
 	make_Group(object);
 	make_Groupframe(Img);
-	// 여기에 최적의 object를 찾아서 넣도록 구현
+	//  insert the best object
 }
 
 
@@ -69,12 +69,12 @@ void PersonSet::make_tmpObject(cv::Mat &Img, bbox_t vec, int imgNum, int objNum)
 	tmpObject[objNum].push_back(tmp);
 }
 void PersonSet::cal_Emotion() { // detect emotion
-	for (int j = 0; j < tmpObject.size(); j++) { // 객체의 수
+	for (int j = 0; j < tmpObject.size(); j++) { // Number of objects
 		std::vector <char *> fnameVec(tmpObject[j].size());
 		std::vector <cv::Mat> fnameMat(tmpObject[j].size());
 
 		for (int i = 0; i < tmpObject[j].size(); i++) { // repeat number of image
-#ifdef SAVE_TEST_FILES // test용 중간 산출물 저장
+#ifdef SAVE_TEST_FILES // Save intermediate output for test
 			fnameVec[i] = new char[100];
 			sprintf(fnameVec[i], "file_%d_%d.jpg", i, j);
 			imwrite(fnameVec[i], tmpObject[j][i].frame);
@@ -94,7 +94,7 @@ void PersonSet::cal_Emotion() { // detect emotion
 	}
 }
 
-void PersonSet::add_Person(cv::Mat &Img, bbox_t vec) // make object (= push person
+void PersonSet::add_Person(cv::Mat &Img, bbox_t vec) // make object (= push person)
 {
 	obj_t tmp;
 	cv::Mat tmpImg;
@@ -183,5 +183,3 @@ void PersonSet::draw_Rect(cv::Mat &dst, cv::Mat &src, bbox_t vec)
 		}
 	}
 }
-
-// 만약에 겹쳐있으면 그것도 하나의 객체로 취급하도록하는 그러면 위치값을 여러개를 가지도록 vector만기들
