@@ -17,7 +17,8 @@ MyClass::MyClass(QWidget *parent)
 	vf = new QCameraViewfinder(ui.verticalLayoutWidget);
 	ui.verticalLayout->addWidget(vf);
 	
-		/* 웹캡을 사용해서 프로젝트를 실행할때 들어가는 코드 
+		/* 
+		//using webcam
 		foreach(QCameraInfo info, QCameraInfo::availableCameras())
 		{
 			cam = new QCamera(info);//웹캡의 설정을 가져온다
@@ -37,13 +38,14 @@ MyClass::~MyClass()
 }
 
 void MyClass::newDig() {
-	//첫번째 버튼을 눌럿을때 이 부분이 실행된다.
+	//This part is executed when the first button is pressed.
 
-	if (ui.strBtn->text() == "start")//버튼의 상태가 start 일 경우 
+	if (ui.strBtn->text() == "start")//If the state of the button is 'start'
 	{
-		ui.strBtn->setText("save");//버튼의 상태를 save로  설정해준다
+		ui.strBtn->setText("save");//Set the state of the button to 'save'.
 
-		QFileDialog fileDialog(this, tr("Open File"), tr("C:"), tr("movie (*.mp4 *.avi )"));//동영상 파일 선택 다이얼로그 생성 
+
+		QFileDialog fileDialog(this, tr("Open File"), tr("C:"), tr("movie (*.mp4 *.avi )"));//Create video file selection dialog 
 		QStringList fileNames;
 		if (fileDialog.exec()) {
 			fileNames = fileDialog.selectedFiles();
@@ -53,98 +55,85 @@ void MyClass::newDig() {
 		for (int nIndex = 0; nIndex < fileNames.size(); nIndex++) {
 			selectedFile.append(fileNames.at(nIndex).toLocal8Bit().constData());
 		}
-		/*웹캠 사용사 코드
-			cam->stop();
+		/*
+		//using webcam
+
+		cam->stop();
 		capture >> frame;
 		*/
-		VideoCapture capture(selectedFile.toStdString());//선택된 동영상의 프레임을 가져온다
+		VideoCapture capture(selectedFile.toStdString());//Brings frames of selected video
 		VideoWriter outputVideo;
 		Mat frame;
 	
-		Size *s = new Size((int)frame.cols, (int)frame.rows);
+		Size *s = new Size((int)frame.cols, (int)frame.rows);// frame size
 
-		outputVideo.open("video.avi", 0, 30, *s, true);
+		outputVideo.open("video.avi", 0, 30, *s, true);		// open video.avi at 30 frames per second
 
-	/*	if (!outputVideo.isOpened())
+	/* using webcam
+	if (!outputVideo.isOpened())
 		{
-			cout << "동영상을 저장하기 위한 초기화 작업 중 에러 발생" << endl;
+			cout << "Error occurred during initialization to save movie" << endl;
 			return;
 		}
 */
-
+		//can not open video
 		if (!capture.isOpened())
 		{
-			cout << "웹캠을 열수 없습니다." << endl;
+			cout << "can not open video" << endl;
 			return;
 		}
 
-		//캡처 영상을 640x480으로 지정  
+		//Specify captured image as 640x480  
 		capture.set(CAP_PROP_FRAME_WIDTH, 640);
 		capture.set(CAP_PROP_FRAME_HEIGHT, 480);
 
 		namedWindow("Cam", 1);
 		int i = 0;
 
-		int fps = 30;
+		int fps = 30;	//fps
 
 		while (1)
 		{
-			//웹캡으로부터 한 프레임을 읽어옴  
-
-
 			i++;
-			if (!capture.read(frame))//읽어올 프레임이 없다면 
-				break;//멈춤
+			if (!capture.read(frame))	//no frame to read 
+				break;
+			
+			outputVideo << frame;	// read 1 frame from outputVideo
 
-			outputVideo << frame;
+	
+			imshow("Cam", frame);	// show video on the screen
 
-			//화면에 영상을 보여줌
-			imshow("Cam", frame);
-
-			//동영상 5초 저장이 끝나면 종료.
+			//Exit after (fps * 8)frame of video saving.
 			if ((fps * 8) == i)
 			{
 				cvDestroyWindow("Cam");
 				break;
 			}
-			//ESC키 누르면 종료
-			if (waitKey(1) == 27)
+	
+			if (waitKey(1) == 27)  //Input ESC key
 			{
-				cvDestroyWindow("Cam");
+				cvDestroyWindow("Cam"); //finish Cam
 				break;
 			}
 		}
 
 		outputVideo.release();
 
-		QMessageBox msgbox;
-		msgbox.setText("aaaaaaaaaaaaaaaaaaaaaaaaaaa");
-		msgbox.setWindowTitle("making...");
-		msgbox.show();
-		sub_Background bg = sub_Background("video.avi");
+		QMessageBox msgbox;		//message box
+		msgbox.setText("aaaaaaaaaaaaaaaaaaaaaaaaaaa");	//message box contents
+		msgbox.setWindowTitle("making...");	//message box title
+		msgbox.show();	//message box show
+		sub_Background bg = sub_Background("video.avi");	//call sub_Background
 		back = bg.bg;
 		per = bg.person_set;
-		msgbox.setWindowTitle("complete");
-		msgbox.setText("complete making Background.!!");
-		msgbox.exec();
-		editDig *edit = new editDig();
-		edit->init(back, per, bg.big_backImg);
+		msgbox.setWindowTitle("complete");		//message box title
+		msgbox.setText("complete making Background.!!"); //message box contents
+		msgbox.exec();	//exec message box
+		editDig *edit = new editDig();	//call editDig
+		edit->init(back, per, bg.big_backImg); //init editDig
 		ui.editBtn->setEnabled(true);
 
 	}
-	else
-	{
-
-		QImage img;
-		img.load("Blue.jpg");
-		QPixmap *buf = new QPixmap();
-		*buf = QPixmap::fromImage(img);
-
-		QString name = QFileDialog::getSaveFileName(this, "save image", "untitle.png", "Images(*.png *.xpm *.jpg)");
-		img.save(name);
-
-	}
-
 
 
 }
