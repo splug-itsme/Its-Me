@@ -21,17 +21,18 @@ editDig::editDig(QWidget * parent) : QWidget(parent) {
 editDig::~editDig() {
 
 }
+//init function
 void editDig::init(cv::Mat cut_bg, PersonSet per,cv::Mat big_bg)
 {
-	for (int i = 0; i < 32; i++)
-		click[i] = false;
+	for (int i = 0; i < 32; i++)	//init click 
+		click[i] = false;			//click means person click
 
-	backG = cut_bg;
+	backG = cut_bg;	
 	editDig::AImg = big_bg;
 	sub_Background = Mat2QImage(big_bg);
 	ui.label->setPixmap(QPixmap::fromImage(sub_Background).scaled(ui.label->size()));
 	QListWidgetItem *list;
-	editDig::per = per;
+	editDig::per = per;		//parameter person
 	for (int k = 0; k < per.size(); k++) {
 		QImage qi= Mat2QImage(per.get_Frame(k));
 		list = new QListWidgetItem(QPixmap::fromImage(qi),NULL);
@@ -43,15 +44,20 @@ void editDig::init(cv::Mat cut_bg, PersonSet per,cv::Mat big_bg)
 	this->show();
 }
 
+//save image
 void editDig::saveImg() {
 	QString name = QFileDialog::getSaveFileName(this, "save image", "untitle.png", "Images(*.png *.xpm *.jpg)");
 	ui.label->pixmap()->toImage().save(name);
 }
+
+// Object restoration function
 void editDig::checkItems(QListWidgetItem *item)
 {
 
 	int n = ui.listWidget->row(item);
-	if (click[n] == false)
+
+	//When the object is clicked
+	if (click[n] == false)		
 		click[n] = true;
 	else
 		click[n] = false;
@@ -62,17 +68,18 @@ void editDig::checkItems(QListWidgetItem *item)
 	backG2 = backG;
 	for (int j = 0; j < per.size(); j++)
 	{	
+		//if click is true, clicked object restoration
 		if (click[j] == true)
 		{
 			group = per.get_Group(j);
-
-			for (int i = 0; i < group.size(); i++) // 그룹의 모든 이미지 집어 넣기
+			//// Put all images in a group
+			for (int i = 0; i < group.size(); i++) 
 				backG2 = add_object(backG2, group[i].frame, cv::Point(group[i].vec.x + group[i].vec.w / 2, group[i].vec.y + group[i].vec.h / 2));
 		}
 
 		
 	}
-	float cutRate = 0.95; // 잘라낼 테두리 비율
+	float cutRate = 0.95; // Border Ratio to crop
 
 	QImage mid = Mat2QImage(backG2(cv::Rect(backG2.cols * (1 - cutRate) / 2, backG2.rows * (1 - cutRate) / 2, backG2.cols * cutRate, backG2.rows * cutRate)));
 	ui.label->setPixmap(QPixmap::fromImage(mid).scaled(ui.label->size()));
@@ -87,7 +94,7 @@ QImage  editDig::Mat2QImage(cv::Mat const& src)
 				 // of QImage::QImage ( const uchar * data, int width, int height, Format format )
 	return dest;
 }
-
+//add person in background
 cv::Mat editDig::add_object(cv::Mat &sub_Background, cv::Mat &object, cv::Point center) {
 	// center is object's center location
 	cv::Mat src_mask = 255 * cv::Mat::ones(object.rows, object.cols, object.depth());
