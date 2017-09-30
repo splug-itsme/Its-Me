@@ -9,14 +9,13 @@
 editDig::editDig(QWidget * parent) : QWidget(parent) {
 	ui.setupUi(this);
 	dw = new QDesktopWidget();
-	width = dw->geometry().width() / 2;
-	height = dw->geometry().height() / 2;
 
 	ui.listWidget->setViewMode(QListWidget::IconMode);
 	ui.listWidget->setIconSize(QSize(200, 200));
 	ui.listWidget->setResizeMode(QListWidget::Adjust);
 	ui.listWidget->setSelectionMode(QListWidget::MultiSelection);
-	}
+	//ui widget setting	
+}
 
 editDig::~editDig() {
 
@@ -27,17 +26,16 @@ void editDig::init(cv::Mat cut_bg, PersonSet per,cv::Mat big_bg)
 	for (int i = 0; i < 32; i++)	//init click 
 		click[i] = false;			//click means person click
 
-	backG = cut_bg;	
-	editDig::AImg = big_bg;
+	backG = cut_bg;	//cutted background 
 	sub_Background = Mat2QImage(big_bg);
 	ui.label->setPixmap(QPixmap::fromImage(sub_Background).scaled(ui.label->size()));
-	QListWidgetItem *list;
+	QListWidgetItem *list;//clickable items 
 	editDig::per = per;		//parameter person
 	for (int k = 0; k < per.size(); k++) {
-		QImage qi= Mat2QImage(per.get_Frame(k));
-		list = new QListWidgetItem(QPixmap::fromImage(qi),NULL);
+		QImage qi= Mat2QImage(per.get_Frame(k));//save item as Qimage type
+		list = new QListWidgetItem(QPixmap::fromImage(qi),NULL);//add item to list 
 		list->setFlags(Qt::ItemIsEditable | Qt::ItemIsEnabled);
-		ui.listWidget->insertItem(k,list);
+		ui.listWidget->insertItem(k,list);//add to widget
 	}
 
 
@@ -46,7 +44,7 @@ void editDig::init(cv::Mat cut_bg, PersonSet per,cv::Mat big_bg)
 
 //save image
 void editDig::saveImg() {
-	QString name = QFileDialog::getSaveFileName(this, "save image", "untitle.png", "Images(*.png *.xpm *.jpg)");
+	QString name = QFileDialog::getSaveFileName(this, "save image", "untitle.png", "Images(*.png *.xpm *.jpg)");//result image save 
 	ui.label->pixmap()->toImage().save(name);
 }
 
@@ -81,8 +79,8 @@ void editDig::checkItems(QListWidgetItem *item)
 	}
 	float cutRate = 0.95; // Border Ratio to crop
 
-	QImage mid = Mat2QImage(backG2(cv::Rect(backG2.cols * (1 - cutRate) / 2, backG2.rows * (1 - cutRate) / 2, backG2.cols * cutRate, backG2.rows * cutRate)));
-	ui.label->setPixmap(QPixmap::fromImage(mid).scaled(ui.label->size()));
+	QImage mid = Mat2QImage(backG2(cv::Rect(backG2.cols * (1 - cutRate) / 2, backG2.rows * (1 - cutRate) / 2, backG2.cols * cutRate, backG2.rows * cutRate)));//apply cutrate 
+	ui.label->setPixmap(QPixmap::fromImage(mid).scaled(ui.label->size()));//show image to widget
 }
 
 QImage  editDig::Mat2QImage(cv::Mat const& src)
