@@ -14,7 +14,7 @@ MyClass::MyClass(QWidget *parent)
 
 	QDesktopWidget * dw = new QDesktopWidget();
 	ui.setupUi(this);
-	vf = new QCameraViewfinder(ui.verticalLayoutWidget);
+	vf = new QCameraViewfinder(ui.verticalLayoutWidget);//camera layout setting
 	ui.verticalLayout->addWidget(vf);
 	
 		/* 
@@ -48,12 +48,12 @@ void MyClass::newDig() {
 		QFileDialog fileDialog(this, tr("Open File"), tr("C:"), tr("movie (*.mp4 *.avi )"));//Create video file selection dialog 
 		QStringList fileNames;
 		if (fileDialog.exec()) {
-			fileNames = fileDialog.selectedFiles();
+			fileNames = fileDialog.selectedFiles();//save filenames to list 
 		}
 
 		QString selectedFile;
 		for (int nIndex = 0; nIndex < fileNames.size(); nIndex++) {
-			selectedFile.append(fileNames.at(nIndex).toLocal8Bit().constData());
+			selectedFile.append(fileNames.at(nIndex).toLocal8Bit().constData());//append filename to absolute path.
 		}
 		/*
 		//using webcam
