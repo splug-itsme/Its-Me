@@ -165,8 +165,8 @@ int analyze_Emtoion::find_Num(std::vector<double> happySize)
 	if (happySize.size() == 0) // If not found
 		return -1;
 	double maxX = *max_element(happySize.begin(), happySize.end());
-	if (maxX < 0.01)
-		return -1;
+	/*if (maxX < 0.001)
+		return -1;*/
 	for (int i = 0; i < happySize.size(); i++)
 	{
 		if (maxX == happySize[i])
@@ -175,3 +175,130 @@ int analyze_Emtoion::find_Num(std::vector<double> happySize)
 	return -1; // ½ÇÆÐ
 }
 
+
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+
+int analyze_Emtoion::detectFaceAndCrop(char *imageName)
+{
+	frontal_face_detector detector = get_frontal_face_detector();
+
+	array2d<rgb_pixel> img;
+
+	load_image(img, imageName);
+
+	pyramid_up(img);
+
+	std::vector<dlib::rectangle> faceRectangles = detector(img);
+
+	std::vector<full_object_detection> facialFeatures;
+
+	for (int j = 0; j < faceRectangles.size(); ++j)
+	{
+		full_object_detection feature = sp(img, faceRectangles[j]);
+		facialFeatures.push_back(feature);
+	}
+
+	dlib::array< array2d<rgb_pixel> > faces;
+
+	extract_image_chips(img, get_face_chip_details(facialFeatures, 500), faces);
+	std::vector<dlib::rectangle> faceCheck;
+	for (int i = 0; i < faces.size(); i++)
+	{
+		stringstream s;
+		faceCheck = detector(faces[i]);
+		if (faceCheck.size() <= 0)
+			continue;
+		s << "face" << (faceNumber++) << ".jpg";
+		save_jpeg(faces[i], s.str(), 100);
+	}
+
+	return(faceRectangles.size());
+}
+
+
+
+
+
+std::vector<sample_type> analyze_Emtoion::getAllAttributes(int noOfFaces)
+{
+	int i, j, k;
+	frontal_face_detector detector = get_frontal_face_detector();
+	std::vector<sample_type> samples;
+	sample_type sample;
+	stringstream s;
+
+
+	for (i = 0; i < faceNumber; i++)
+	{
+		array2d<rgb_pixel> img;
+		s.str("");
+		s << "face" << (i) << ".jpg";
+		load_image(img, s.str());
+
+
+		std::vector<dlib::rectangle> faceRectangles = detector(img);
+
+		std::vector<full_object_detection> facialFeatures;
+
+		full_object_detection feature = sp(img, faceRectangles[0]);
+		int l = 0;
+		for (int j = 0; j < 68; j++)
+			for (int k = 0; k < j; k++, l++)
+			{
+				sample(l) = length(feature.part(j), feature.part(k));
+				l++;
+				sample(l) = slope(feature.part(j), feature.part(k));
+
+			}
+		samples.push_back(sample);
+
+	}
+	return samples;
+}
+
+
+
+analyze_Emtoion::analyze_Emtoion(std::vector<char *> face) // Analyze emotions about people and return optimal emotion photo number
+{
+	std::vector <double> happySize;
+
+
+	deserialize(shapeFileName) >> sp;
+	deserialize(emotionFileName1) >> ep1;
+	deserialize(emotionFileName2) >> ep2;
+	deserialize(emotionFileName3) >> ep3;
+	deserialize(emotionFileName4) >> ep4;
+
+
+	cout << "\n\nProgram Started\n\n";
+	for (int i = 0; i < face.size(); i++) { // photographs of the emotional analysis comparison = photographs of the same person
+		int noOfFaces = 0;
+		faceNumber = 0;
+		std::vector<sample_type> samples;
+		
+		noOfFaces += detectFaceAndCrop(face[i]);
+
+		samples = getAllAttributes(noOfFaces);
+
+		std::vector<double> prob;
+		if (samples.size() == 0) { // if can't catch face
+			happySize.push_back(0);
+			continue;
+		}
+		prob = svm_Multiclass(samples[0]);
+		prob = cal_Probablity(prob); // Analyzing the possibility of each emotion with data
+		cout << "probablity that face " << " is Neutral  :" << prob[0] << endl;
+		cout << "probablity that face " << " is Happy    :" << prob[1] << endl;
+		cout << "probablity that face " << " is Sad      :" << prob[2] << endl;
+		cout << "probablity that face " << " is Surprise :" << prob[3] << "\n\n\n";
+		happySize.push_back(prob[1]);
+
+
+		//cout << "\n\nPress Enter to delete all Photos.............";
+		//cin.ignore();
+	}
+	faceN = find_Num(happySize);
+}

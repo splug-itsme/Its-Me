@@ -69,28 +69,40 @@ void PersonSet::make_tmpObject(cv::Mat &Img, bbox_t vec, int imgNum, int objNum)
 	tmpObject[objNum].push_back(tmp);
 }
 void PersonSet::cal_Emotion() { // detect emotion
-	for (int j = 0; j < tmpObject.size(); j++) { // Number of objects
-		std::vector <char *> fnameVec(tmpObject[j].size());
-		std::vector <cv::Mat> fnameMat(tmpObject[j].size());
+	for (int objectNum = 0; objectNum < tmpObject.size(); objectNum++) { // Number of objects
+		std::vector <char *> fnameVec(tmpObject[objectNum].size());
+		std::vector <cv::Mat> fnameMat(tmpObject[objectNum].size());
 
-		for (int i = 0; i < tmpObject[j].size(); i++) { // repeat number of image
-#ifdef SAVE_TEST_FILES // Save intermediate output for test
+		for (int i = 0; i < tmpObject[objectNum].size(); i++) { // repeat number of image
 			fnameVec[i] = new char[100];
-			sprintf(fnameVec[i], "file_%d_%d.jpg", i, j);
-			imwrite(fnameVec[i], tmpObject[j][i].frame);
-#endif
-			fnameMat[i] = tmpObject[j][i].frame;
+			sprintf(fnameVec[i], "file_%d_%d.jpg", i, objectNum);
+			imwrite(fnameVec[i], tmpObject[objectNum][i].frame);
 		}
-		analyze_Emtoion ff = analyze_Emtoion(fnameMat); // return happiest image num
-		printf("faceNum : %d\n", ff.faceN);
-		if (ff.faceN == -1) // if cant detect face
-			object.push_back(tmpObject[j][0]);
-		else
-			object.push_back(tmpObject[j][ff.faceN]);
-		
-		imwrite("emotion.bmp", object[j].frame);
-		imwrite("original.bmp", tmpObject[j][0].frame);
+		analyze_Emtoion ff = analyze_Emtoion(fnameVec); // return happiest image num
 
+		if (ff.faceN == -1) // if cant detect face
+			object.push_back(tmpObject[objectNum][0]);
+		else
+			object.push_back(tmpObject[objectNum][ff.faceN]);
+		
+		imwrite("emotion.bmp", object[objectNum].frame);
+		imwrite("original.bmp", tmpObject[objectNum][0].frame);
+#ifndef SAVE_TEST_FILES // Save intermediate output for test
+		remove_Objects(objectNum, fnameVec);
+#endif
+
+	}
+}
+void PersonSet::remove_Objects(int fileNum, std::vector<char *>  fnameVec)
+{
+	int i;
+	stringstream s;
+
+	for (i = 0; i < fnameVec.size(); i++)
+	{
+		s.str("");
+		s << "file_" << i <<"_" << fileNum <<  ".jpg";
+		remove(s.str().c_str());
 	}
 }
 

@@ -48,7 +48,10 @@ public:
 	std::vector<double> svm_Multiclass(sample_type sample);
 	std::vector<double> cal_Probablity(std::vector<double> P);
 	int find_Num(std::vector<double> happySize);
-
+	/////////////////////////////////////////////////
+	std::vector<sample_type> getAllAttributes(int noOfFaces);
+	int detectFaceAndCrop(char *imageName);
+	analyze_Emtoion::analyze_Emtoion(std::vector<char *> face);
 };
 
 #endif
