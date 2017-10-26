@@ -33,7 +33,7 @@
 #include <algorithm>
 
 #define DEGREE 10
-#define RECURSIVE_COUNT 30
+#define RECURSIVE_COUNT 70
 
 using namespace std;
 
