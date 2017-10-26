@@ -1,5 +1,6 @@
 #include "PersonSet.h"
-
+#include <direct.h>
+#include <Windows.h>
 
 using namespace cv;
 PersonSet::PersonSet()
@@ -69,13 +70,17 @@ void PersonSet::make_tmpObject(cv::Mat &Img, bbox_t vec, int imgNum, int objNum)
 	tmpObject[objNum].push_back(tmp);
 }
 void PersonSet::cal_Emotion() { // detect emotion
+	std::vector <char *> folderName(tmpObject.size());
+
 	for (int objectNum = 0; objectNum < tmpObject.size(); objectNum++) { // Number of objects
 		std::vector <char *> fnameVec(tmpObject[objectNum].size());
 		std::vector <cv::Mat> fnameMat(tmpObject[objectNum].size());
-
+		folderName[objectNum] = new char[100];
+		sprintf(folderName[objectNum], "face_%d", objectNum);
+		mkdir(folderName[objectNum]);
 		for (int i = 0; i < tmpObject[objectNum].size(); i++) { // repeat number of image
 			fnameVec[i] = new char[100];
-			sprintf(fnameVec[i], "file_%d_%d.jpg", i, objectNum);
+			sprintf(fnameVec[i], "%s/file_%d_%d.jpg",folderName[objectNum], i, objectNum);
 			imwrite(fnameVec[i], tmpObject[objectNum][i].frame);
 		}
 		analyze_Emtoion ff = analyze_Emtoion(fnameVec); // return happiest image num
@@ -85,15 +90,17 @@ void PersonSet::cal_Emotion() { // detect emotion
 		else
 			object.push_back(tmpObject[objectNum][ff.faceN]);
 		
-		imwrite("emotion.bmp", object[objectNum].frame);
-		imwrite("original.bmp", tmpObject[objectNum][0].frame);
+		//imwrite("emotion.bmp", object[objectNum].frame);
+		//imwrite("e,.bmp", tmpObject[objectNum][0].frame);
 #ifndef SAVE_TEST_FILES // Save intermediate output for test
-		remove_Objects(objectNum, fnameVec);
+		remove("emotion.bmp");
+		remove_Objects(objectNum, fnameVec, folderName[objectNum]);
+		RemoveDirectoryA(folderName[objectNum]);		
 #endif
 
 	}
 }
-void PersonSet::remove_Objects(int fileNum, std::vector<char *>  fnameVec)
+void PersonSet::remove_Objects(int fileNum, std::vector<char *>  fnameVec, char * folder)
 {
 	int i;
 	stringstream s;
@@ -101,7 +108,7 @@ void PersonSet::remove_Objects(int fileNum, std::vector<char *>  fnameVec)
 	for (i = 0; i < fnameVec.size(); i++)
 	{
 		s.str("");
-		s << "file_" << i <<"_" << fileNum <<  ".jpg";
+		s << folder << "/file_" << i <<"_" << fileNum <<  ".jpg";
 		remove(s.str().c_str());
 	}
 }

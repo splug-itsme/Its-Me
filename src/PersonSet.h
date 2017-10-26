@@ -41,7 +41,9 @@ public:
 	void cal_Emotion();
 	cv::Mat get_Frame(int cnt);
 	void draw_Rect(cv::Mat &dst, cv::Mat &src, bbox_t vec);
-	void remove_Objects(int fileNum, std::vector<char *>  fnameVec);
+	void remove_Objects(int fileNum, std::vector<char *>  fnameVec, char * folder);
+
+	//void remove_Objects(int fileNum, std::vector<char *>  fnameVec);
 };
 
 

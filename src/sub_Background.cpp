@@ -139,7 +139,7 @@ void sub_Background::add_ObjectToRes(cv::Mat &des, char *filename) {
 	}
 	Capture.read(back_Img);
 	bgrCapture.read(first_Img); // Save the first frame from the original image to Img
-
+	
 	std::vector<bbox_t> first_vec = detector.detect(first_Img); // Save the first frame's person location
 #ifdef DETECT_EMOTION
 	std::vector <cv::Mat> emotion_ImgSet; // Image vector for emotion computation
