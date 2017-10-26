@@ -145,9 +145,14 @@ void sub_Background::add_ObjectToRes(cv::Mat &des, char *filename) {
 	std::vector <cv::Mat> emotion_ImgSet; // Image vector for emotion computation
 
 	emotion_ImgSet.push_back(first_Img);
+	int tmpNum = 0;
 	for (int i = 0; i < RECURSIVE_COUNT; i++) { //  RECURSIVE_COUNT  = 30
 		cv::Mat tmpImg;
+		
 		bgrCapture.read(tmpImg);
+		tmpNum++;
+		if (tmpNum % 2 == 1)
+			continue;
 		emotion_ImgSet.push_back(tmpImg);
 	}
 	person_set = PersonSet(back_Img, emotion_ImgSet, first_vec); //  emotion detect person
